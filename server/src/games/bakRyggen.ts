@@ -9,6 +9,8 @@ export const COUNTDOWN_MS = 5_000;
 
 export interface BakRyggenInternal {
   phase: "writing" | "countdown" | "reveal";
+  /** Players expected to submit this writing round (includes mid-round joiners). */
+  eligibleWriterIds: string[];
   submissions: Map<string, BakRyggenSubmission>;
   revealQueue: BakRyggenPublicSubmission[];
   revealIndex: number;
@@ -17,9 +19,10 @@ export interface BakRyggenInternal {
   countdownEndsAt?: number;
 }
 
-export function startBakRyggen(_playerIds: string[]): BakRyggenInternal {
+export function startBakRyggen(playerIds: string[]): BakRyggenInternal {
   return {
     phase: "writing",
+    eligibleWriterIds: [...playerIds],
     submissions: new Map(),
     revealQueue: [],
     revealIndex: 0,

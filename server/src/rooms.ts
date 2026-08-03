@@ -28,6 +28,7 @@ import {
 import {
   advanceVoteOff,
   castVote,
+  expectedVoterCount,
   filledPrompt,
   forceReveal,
   startVoteOff,
@@ -37,7 +38,7 @@ import {
 
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 20;
-const PIN_LENGTH = 5;
+const PIN_LENGTH = 4;
 
 export interface Room {
   pin: string;
@@ -153,8 +154,14 @@ function scheduleWritingDeadline(room: Room) {
 }
 
 function generatePin(): string {
-  // TEMP: fixed PIN for easy local testing — revert before shipping
-  return "123";
+  for (let attempt = 0; attempt < 50; attempt++) {
+    let pin = "";
+    for (let i = 0; i < PIN_LENGTH; i++) {
+      pin += String(randomBytes(1)[0] % 10);
+    }
+    if (!rooms.has(pin)) return pin;
+  }
+  throw new Error("Could not allocate a free PIN.");
 }
 
 function newPlayerId(): string {
@@ -198,9 +205,6 @@ export function joinRoom(
 ): { room: Room; playerId: string } | { error: string } {
   const room = rooms.get(pin.trim());
   if (!room) return { error: "Room not found. Check the PIN." };
-  if (room.mode !== "lobby") {
-    return { error: "The game has already started." };
-  }
   if (room.players.size >= MAX_PLAYERS) {
     return { error: "The room is full." };
   }
@@ -219,6 +223,23 @@ export function joinRoom(
     ...(avatar ? { avatar } : {}),
   });
   room.sockets.set(socketId, playerId);
+
+  // Fold mid-game joiners into the current interactive round when possible.
+  if (
+    room.mode === "bakRyggen" &&
+    room.bakRyggen?.phase === "writing" &&
+    !room.bakRyggen.eligibleWriterIds.includes(playerId)
+  ) {
+    room.bakRyggen.eligibleWriterIds.push(playerId);
+  }
+  if (
+    room.mode === "voteoff" &&
+    room.voteoff?.phase === "voting" &&
+    !room.voteoff.expectedVoterIds.includes(playerId)
+  ) {
+    room.voteoff.expectedVoterIds.push(playerId);
+  }
+
   return { room, playerId };
 }
 
@@ -261,6 +282,35 @@ export function leaveRoom(socketId: string): Room | null {
   // If game in progress and too few players, reset to lobby
   if (room.mode !== "lobby" && room.players.size < MIN_PLAYERS) {
     resetRoomToLobby(room);
+    return room;
+  }
+
+  // Leaving can unblock a round that was waiting on that player.
+  if (
+    room.mode === "bakRyggen" &&
+    room.bakRyggen?.phase === "writing"
+  ) {
+    const required = room.bakRyggen.eligibleWriterIds.filter((id) =>
+      room.players.has(id)
+    );
+    if (
+      required.length > 0 &&
+      required.every((id) => room.bakRyggen!.submissions.has(id))
+    ) {
+      enterCountdown(room);
+    }
+  }
+  if (room.mode === "voteoff" && room.voteoff?.phase === "voting") {
+    const playerIds = [...room.players.keys()];
+    const needed = room.voteoff.expectedVoterIds.filter((id) =>
+      room.players.has(id)
+    );
+    if (
+      needed.length > 0 &&
+      needed.every((id) => room.voteoff!.votes.has(id))
+    ) {
+      room.voteoff.phase = "reveal";
+    }
   }
 
   return room;
@@ -342,7 +392,17 @@ export function submitBakRyggen(
     challenge,
   });
 
-  if (game.submissions.size === room.players.size) {
+  if (!game.eligibleWriterIds.includes(playerId)) {
+    game.eligibleWriterIds.push(playerId);
+  }
+
+  const required = game.eligibleWriterIds.filter((id) =>
+    room.players.has(id)
+  );
+  if (
+    required.length > 0 &&
+    required.every((id) => game.submissions.has(id))
+  ) {
     enterCountdown(room);
   }
   return null;
@@ -426,7 +486,7 @@ function voteoffPublic(
         anonymous: false,
         hasVoted: false,
         votedCount: game.votes.size,
-        totalVoters: room.players.size,
+        totalVoters: expectedVoterCount(game, [...room.players.keys()]),
       };
     }
     return undefined;
@@ -436,6 +496,7 @@ function voteoffPublic(
     [...room.players.values()].map((p) => [p.id, p.name])
   );
   const prompt = filledPrompt(game, nameById);
+  const playerIds = [...room.players.keys()];
   const base: VoteOffState = {
     phase: game.phase,
     kind: game.current.kind,
@@ -448,7 +509,7 @@ function voteoffPublic(
     subject: playerRef(room, game.subjectId),
     hasVoted: game.votes.has(viewerId),
     votedCount: game.votes.size,
-    totalVoters: room.players.size,
+    totalVoters: expectedVoterCount(game, playerIds),
   };
 
   if (game.phase === "reveal" || game.phase === "finished") {
@@ -480,10 +541,17 @@ function bakRyggenPublic(
   const game = room.bakRyggen;
   if (!game) return undefined;
 
+  const expectedWriters = game.eligibleWriterIds.filter((id) =>
+    room.players.has(id)
+  );
+
   return {
     phase: game.phase,
     submittedCount: game.submissions.size,
-    totalPlayers: room.players.size,
+    totalPlayers:
+      game.phase === "writing"
+        ? Math.max(expectedWriters.length, game.submissions.size)
+        : room.players.size,
     hasSubmitted: game.submissions.has(viewerId),
     writingEndsAt: game.writingEndsAt,
     countdownEndsAt: game.countdownEndsAt,

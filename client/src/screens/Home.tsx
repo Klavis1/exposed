@@ -194,10 +194,10 @@ export function Home({
               label="PIN"
               value={pin}
               inputMode="numeric"
-              maxLength={6}
-              placeholder="5 digits"
+              maxLength={4}
+              placeholder="4 digits"
               autoFocus
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
             />
             <AvatarPicker
               name={name}
@@ -215,9 +215,12 @@ export function Home({
               placeholder="e.g. Nora"
               onChange={(e) => setName(e.target.value)}
             />
+            <p className="text-center text-xs text-[var(--color-muted)]">
+              You can join even if the game already started.
+            </p>
             <Button
               type="submit"
-              disabled={busy || !name.trim() || pin.length < 3 || !connected}
+              disabled={busy || !name.trim() || pin.length < 4 || !connected}
             >
               {busy ? "Joining…" : "Join"}
             </Button>

@@ -20,6 +20,8 @@ export interface VoteOffInternal {
   subjectId?: string;
   /** voterId -> choiceId (player id, or "yes" | "no") */
   votes: Map<string, string>;
+  /** Players who must vote this round (includes mid-round joiners). */
+  expectedVoterIds: string[];
   /** playerId -> times featured as option/subject */
   appearanceCounts: Map<string, number>;
 }
@@ -107,6 +109,7 @@ export function startVoteOff(playerIds: string[]): VoteOffInternal {
     current: null,
     anonymous: false,
     votes: new Map(),
+    expectedVoterIds: [],
     appearanceCounts: new Map(),
   };
   dealQuestion(state, playerIds);
@@ -121,6 +124,7 @@ export function dealQuestion(
     state.phase = "finished";
     state.current = null;
     state.votes.clear();
+    state.expectedVoterIds = [];
     return;
   }
 
@@ -132,6 +136,7 @@ export function dealQuestion(
   state.current = prompt;
   state.anonymous = Math.random() < 0.5;
   state.votes = new Map();
+  state.expectedVoterIds = [...playerIds];
   state.phase = "voting";
   state.optionAId = undefined;
   state.optionBId = undefined;
@@ -167,6 +172,14 @@ export function filledPrompt(
   });
 }
 
+function requiredVoters(
+  state: VoteOffInternal,
+  playerIds: string[]
+): string[] {
+  const present = new Set(playerIds);
+  return state.expectedVoterIds.filter((id) => present.has(id));
+}
+
 export function castVote(
   state: VoteOffInternal,
   voterId: string,
@@ -188,10 +201,21 @@ export function castVote(
 
   state.votes.set(voterId, choiceId);
 
-  if (state.votes.size >= playerIds.length) {
+  const required = requiredVoters(state, playerIds);
+  if (
+    required.length > 0 &&
+    required.every((id) => state.votes.has(id))
+  ) {
     state.phase = "reveal";
   }
   return null;
+}
+
+export function expectedVoterCount(
+  state: VoteOffInternal,
+  playerIds: string[]
+): number {
+  return requiredVoters(state, playerIds).length;
 }
 
 export function forceReveal(state: VoteOffInternal): string | null {
