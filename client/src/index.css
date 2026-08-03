@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --color-ink: #f7f2eb;
+  --color-muted: #9a9088;
+  --color-surface: #171316;
+  --color-surface-2: #221c20;
+  --color-line: #3a3236;
+  --color-accent: #ff5c6a;
+  --color-accent-2: #ff9b6a;
+  --color-gossip: #4aa3ff;
+  --color-tea: #4aa3ff;
+  --color-success: #4ade9a;
+  --color-category: #f0c14b;
+  --color-rule: #7dd3c0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background:
+    radial-gradient(900px 520px at 85% -15%, rgba(255, 92, 106, 0.16), transparent 55%),
+    radial-gradient(700px 400px at 0% 100%, rgba(125, 211, 192, 0.07), transparent 45%),
+    linear-gradient(180deg, #110e11 0%, #0a090b 55%, #100d0f 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+/* Custom scrollbars — match dark surface / accent look */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3236 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-line) 85%, var(--color-muted));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-accent) 55%, var(--color-line));
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bubble-swap {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+    filter: blur(4px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  75% {
+    transform: translateY(-4px) scale(1.015);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.45s ease both;
+}
+
+.animate-card-in {
+  animation: card-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-bubble-swap {
+  animation: bubble-swap 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+@keyframes mode-pick-float {
+  from {
+    transform: scale(1.05) translateY(-2px);
+  }
+  to {
+    transform: scale(1.07) translateY(-7px);
+  }
+}
+
+@keyframes mode-pick-pop {
+  0% {
+    transform: scale(1.05) translateY(-3px);
+    filter:
+      brightness(1.08)
+      drop-shadow(-1px -2px 0 rgba(255, 255, 255, 0.45))
+      drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.65))
+      drop-shadow(0 0 1px var(--mode-pick-accent, var(--color-accent)))
+      drop-shadow(0 0 2px var(--mode-pick-accent, var(--color-accent)));
+  }
+  40% {
+    transform: scale(0.9) translateY(3px);
+    filter:
+      brightness(0.96)
+      drop-shadow(0 1px 0 rgba(255, 255, 255, 0.15))
+      drop-shadow(0 4px 0 rgba(0, 0, 0, 0.55));
+  }
+  100% {
+    transform: scale(1.12) translateY(-8px);
+    filter:
+      brightness(1.18)
+      drop-shadow(-1px -2px 0 rgba(255, 255, 255, 0.5))
+      drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.7))
+      drop-shadow(0 0 2px var(--mode-pick-accent, var(--color-accent)))
+      drop-shadow(0 10px 22px color-mix(in srgb, var(--mode-pick-accent, var(--color-accent)) 45%, transparent));
+    opacity: 0.7;
+  }
+}
+
+.mode-pick {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mode-pick:focus-visible {
+  outline: none;
+}
+
+.mode-pick:focus-visible img {
+  filter:
+    brightness(1.05)
+    drop-shadow(0 0 1px var(--mode-pick-accent, var(--color-accent)))
+    drop-shadow(0 0 3px var(--mode-pick-accent, var(--color-accent)));
+}
+
+.mode-pick img {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  max-height: min(28vh, 160px);
+  height: auto;
+  margin-inline: auto;
+  object-fit: contain;
+  pointer-events: none;
+  transform-origin: center;
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.28s ease;
+  /* Resting silhouette bevel — follows logo alpha, not a box */
+  filter:
+    drop-shadow(-1px -1px 0 rgba(255, 255, 255, 0.12))
+    drop-shadow(1px 2px 0 rgba(0, 0, 0, 0.45))
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
+}
+
+.mode-pick:hover:not(:disabled):not(.mode-pick--clicked) img {
+  animation: mode-pick-float 0.9s ease-in-out infinite alternate;
+  filter:
+    brightness(1.1)
+    /* light rim (top-left) + dark rim (bottom-right) = bevel on silhouette */
+    drop-shadow(-1.5px -2px 0 rgba(255, 255, 255, 0.5))
+    drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 0.5px var(--mode-pick-accent, var(--color-accent)))
+    drop-shadow(0 0 1.5px var(--mode-pick-accent, var(--color-accent)))
+    drop-shadow(
+      0 12px 22px
+        color-mix(in srgb, var(--mode-pick-accent, var(--color-accent)) 40%, transparent)
+    );
+}
+
+.mode-pick:active:not(:disabled):not(.mode-pick--clicked) img {
+  animation: none;
+  transform: scale(0.93) translateY(2px);
+  filter:
+    brightness(0.95)
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.2))
+    drop-shadow(0 3px 0 rgba(0, 0, 0, 0.55));
+}
+
+.mode-pick--clicked img {
+  animation: mode-pick-pop 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.mode-pick:disabled {
+  cursor: default;
+}

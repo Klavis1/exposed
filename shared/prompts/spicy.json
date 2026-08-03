@@ -1,0 +1,782 @@
+[
+  {
+    "id": "s1",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to show their favourite sex position with {name2}."
+  },
+  {
+    "id": "s2",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to give {name2} a constructive compliment."
+  },
+  {
+    "id": "s3",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to hold eye contact with {name2} for 10 seconds."
+  },
+  {
+    "id": "s4",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to rate {name2}'s bouncy ass ass."
+  },
+  {
+    "id": "s5",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to slow-dance with {name2}."
+  },
+  {
+    "id": "s6",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to switch drinks with {name2}."
+  },
+  {
+    "id": "s7",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to let {name2} choose their next drink."
+  },
+  {
+    "id": "s8",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to tell {name2} their first impression of them."
+  },
+  {
+    "id": "s9",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to read their latest text message out loud."
+  },
+  {
+    "id": "s10",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to kiss {name2} on the cheek."
+  },
+  {
+    "id": "s11",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to rate {name2}'s armpits."
+  },
+  {
+    "id": "s12",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to rate {name2}'s collarbones."
+  },
+  {
+    "id": "s13",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to send a dirty message by phone to {name2}."
+  },
+  {
+    "id": "s14",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to show their last 3 pictures in camera roll."
+  },
+  {
+    "id": "s15",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to show their last selfie."
+  },
+  {
+    "id": "s16",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to guess {name2}'s biggest turn-on."
+  },
+  {
+    "id": "s17",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to describe {name2} in only three spicy adjectives."
+  },
+  {
+    "id": "s18",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to rate {name2}'s voice."
+  },
+  {
+    "id": "s19",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to steal a sip from someone's drink."
+  },
+  {
+    "id": "s20",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to feed {name2} a sip of their drink."
+  },
+  {
+    "id": "s21",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to name someone here they'd kiss."
+  },
+  {
+    "id": "s22",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to name someone here they'd sleep with."
+  },
+  {
+    "id": "s23",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to describe {name2}'s sex appeal in 3 words."
+  },
+  {
+    "id": "s24",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to guess {name2}'s body count."
+  },
+  {
+    "id": "s25",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to reveal their body count."
+  },
+  {
+    "id": "s26",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to ask {name2} any yes/no question."
+  },
+  {
+    "id": "s27",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to let {name2} ask them anything — they must answer."
+  },
+  {
+    "id": "s28",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to mime their favourite sex position."
+  },
+  {
+    "id": "s29",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to teach {name2} how they kiss — in the air."
+  },
+  {
+    "id": "s30",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to tell {name2} what their type is — and whether {name2} fits."
+  },
+  {
+    "id": "s31",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to confess if they've ever stalked {name2} online."
+  },
+  {
+    "id": "s32",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to give {name2} a hug."
+  },
+  {
+    "id": "s33",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to give {name2} a 20-second shoulder massage."
+  },
+  {
+    "id": "s34",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to let {name2} send one text from their phone."
+  },
+  {
+    "id": "s35",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to say what turns them on."
+  },
+  {
+    "id": "s36",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to confess their biggest turn-on."
+  },
+  {
+    "id": "s37",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to confess their biggest turn-off."
+  },
+  {
+    "id": "s38",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to rank everyone from most innocent to most freaky."
+  },
+  {
+    "id": "s39",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to confess their most recent celebrity crush."
+  },
+  {
+    "id": "s40",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to reveal a rumor they've heard about {name2}."
+  },
+  {
+    "id": "s41",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to describe {name2} with a song title."
+  },
+  {
+    "id": "s42",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to invent a dating-app bio for {name2}."
+  },
+  {
+    "id": "s43",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to show us their best sexy walk."
+  },
+  {
+    "id": "s44",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to do a 10-second sexy dance."
+  },
+  {
+    "id": "s45",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to do one push-up while moaning."
+  },
+  {
+    "id": "s46",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to show {name2} their most recent search history item."
+  },
+  {
+    "id": "s47",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to roast {name2} for 10 seconds — then compliment them."
+  },
+  {
+    "id": "s48",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you have sent nudes, drink."
+  },
+  {
+    "id": "s49",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've kissed someone in this room, drink."
+  },
+  {
+    "id": "s50",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever had a one-night stand, drink."
+  },
+  {
+    "id": "s51",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever ghosted someone after a hookup, drink."
+  },
+  {
+    "id": "s52",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to show the group their most recent photo of a person."
+  },
+  {
+    "id": "s53",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to compliment {name2}'s outfit — make it flirty."
+  },
+  {
+    "id": "s54",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've made out with more than one person in one night, drink."
+  },
+  {
+    "id": "s55",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever had a crush on a friend's sibling, drink."
+  },
+  {
+    "id": "s56",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever lied about your body count, drink."
+  },
+  {
+    "id": "s57",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to let {name2} set a dare for them right now."
+  },
+  {
+    "id": "s58",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've hooked up with a friend's ex, drink."
+  },
+  {
+    "id": "s59",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever had sex outdoors, drink."
+  },
+  {
+    "id": "s60",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever joined the mile-high club, drink."
+  },
+  {
+    "id": "s61",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to moan their own name."
+  },
+  {
+    "id": "s62",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever faked it, drink."
+  },
+  {
+    "id": "s63",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to pick a pet name for {name2} and use it once."
+  },
+  {
+    "id": "s64",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to call {name2} hot without laughing."
+  },
+  {
+    "id": "s65",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've kissed someone within 24 hours of meeting them, drink."
+  },
+  {
+    "id": "s66",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever had a friends-with-benefits, drink."
+  },
+  {
+    "id": "s67",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've used a dating app this month, drink."
+  },
+  {
+    "id": "s68",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever been caught in the act, drink. Storytime!"
+  },
+  {
+    "id": "s69",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever stayed friends with an ex, drink."
+  },
+  {
+    "id": "s70",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to tell {name2} the first thing they noticed about them."
+  },
+  {
+    "id": "s71",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever redownloaded a dating app after deleting it, drink."
+  },
+  {
+    "id": "s72",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever had a crush on a colleague, drink."
+  },
+  {
+    "id": "s73",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to tell {name2} where they'd kiss them first."
+  },
+  {
+    "id": "s74",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever Googled how to tie a tie, drink."
+  },
+  {
+    "id": "s75",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to show their best “come here” face."
+  },
+  {
+    "id": "s76",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to tell us their best pickup line."
+  },
+  {
+    "id": "s77",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever deleted texts so someone wouldn't see them, drink."
+  },
+  {
+    "id": "s78",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to say if they'd date {name2} in another life — yes or no."
+  },
+  {
+    "id": "s79",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to fake a romantic proposal to {name2}."
+  },
+  {
+    "id": "s80",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever been in love with someone who didn't love you back, drink."
+  },
+  {
+    "id": "s81",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever checked someone's story more than once in a day, drink."
+  },
+  {
+    "id": "s82",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever searched someone up after meeting them once, drink."
+  },
+  {
+    "id": "s83",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to ask {name2}: “Have you ever thought about me like that?”"
+  },
+  {
+    "id": "s84",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've kissed someone tonight already, drink."
+  },
+  {
+    "id": "s85",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever gone home with someone from a party, drink."
+  },
+  {
+    "id": "s86",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} has to finish the sentence: “Tonight I want…”"
+  },
+  {
+    "id": "s87",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to finish the sentence to {name2}: “If we were alone…”"
+  },
+  {
+    "id": "s88",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever read someone's texts without asking, drink."
+  },
+  {
+    "id": "s89",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever danced grind-style with someone you weren't dating, drink."
+  },
+  {
+    "id": "s90",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} has to put lipstick / chapstick on {name2} (or mime it)."
+  },
+  {
+    "id": "s91",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever bit someone's lip on purpose, drink."
+  },
+  {
+    "id": "s92",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you're too much in bed, drink."
+  },
+  {
+    "id": "s93",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever had to sneak out in the morning, drink."
+  },
+  {
+    "id": "s94",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever blacked out and still made it home, drink."
+  },
+  {
+    "id": "s95",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever ghosted after a hookup, drink."
+  },
+  {
+    "id": "s96",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever screenshotted a nude you received, drink."
+  },
+  {
+    "id": "s97",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever said the wrong name during sex, drink."
+  },
+  {
+    "id": "s98",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever liked someone's story just to get their attention, drink."
+  },
+  {
+    "id": "s99",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever hooked up with someone just to make someone else jealous, drink."
+  },
+  {
+    "id": "s100",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "If you've ever left a hickey, drink."
+  },
+  {
+    "id": "c1",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Sex positions. {name} starts."
+  },
+  {
+    "id": "c2",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Synonyms for masturbate. {name} starts."
+  },
+  {
+    "id": "c3",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Synonyms for sex. {name} starts."
+  },
+  {
+    "id": "c4",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Car brands. {name} starts."
+  },
+  {
+    "id": "c5",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Colleagues' names. {name} starts."
+  },
+  {
+    "id": "c6",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Cities or countries starting with {letter}. {name} starts."
+  },
+  {
+    "id": "c7",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Movie titles starting with {letter}. {name} starts."
+  },
+  {
+    "id": "c8",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: {name} can choose the category. {name} starts."
+  },
+  {
+    "id": "c9",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Alcohol brands. {name} starts."
+  },
+  {
+    "id": "c10",
+    "kind": "category",
+    "targets": 1,
+    "text": "Category: Song titles. {name} starts."
+  },
+  {
+    "id": "r1",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} has to sit on {name2}'s lap until told otherwise."
+  },
+  {
+    "id": "r2",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} can't speak until told otherwise."
+  },
+  {
+    "id": "r3",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} needs a break from looking at boobs. (Won't be long, don't worry)"
+  },
+  {
+    "id": "r4",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to speak only in questions until told otherwise."
+  },
+  {
+    "id": "r5",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} has to drink whenever {name2} drinks until told otherwise."
+  },
+  {
+    "id": "r6",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to pick a drinking buddy — they drink together until told otherwise."
+  },
+  {
+    "id": "r7",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} has to flirt with {name2} every time they speak until told otherwise."
+  },
+  {
+    "id": "r8",
+    "kind": "rule",
+    "targets": 3,
+    "text": "{name} has to call {name1} by a name of {name2}'s choice until told otherwise."
+  },
+  {
+    "id": "r9",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} has to call {name2} “baby” until told otherwise."
+  },
+  {
+    "id": "r10",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} can't say “no” until told otherwise."
+  },
+  {
+    "id": "r11",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to smile constantly until told otherwise."
+  },
+  {
+    "id": "r12",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to agree with everything until told otherwise."
+  },
+  {
+    "id": "r13",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to start every sentence with “honestly” until told otherwise."
+  },
+  {
+    "id": "r14",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to end every sentence with “uwu” until told otherwise."
+  },
+  {
+    "id": "r15",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to stand up whenever they speak until told otherwise."
+  },
+  {
+    "id": "r16",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to always have a drink in their hand until told otherwise."
+  },
+  {
+    "id": "r17",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to talk only in song lyrics until told otherwise."
+  },
+  {
+    "id": "r18",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} has to ask {name2} for permission before drinking until told otherwise."
+  },
+  {
+    "id": "r19",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to end every sentence with “no cap” until told otherwise."
+  },
+  {
+    "id": "r20",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} has to end every sentence with “inshallah” until told otherwise."
+  }
+]
