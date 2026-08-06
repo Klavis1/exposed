@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { Locale, PlayMode } from "@shared/types";
 import { AvatarPicker } from "../components/AvatarPicker";
 import { LanguageToggle } from "../components/LanguageToggle";
@@ -11,6 +11,28 @@ import {
   Shell,
 } from "../components/ui";
 import { useI18n } from "../i18n/LocaleContext";
+
+function readPinFromQuery(): string | null {
+  try {
+    const raw = new URLSearchParams(window.location.search).get("pin") ?? "";
+    const digits = raw.replace(/\D/g, "").slice(0, 4);
+    return digits.length === 4 ? digits : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearPinQuery() {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("pin")) return;
+    url.searchParams.delete("pin");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState({}, "", next);
+  } catch {
+    /* ignore */
+  }
+}
 
 interface Props {
   busy: boolean;
@@ -73,6 +95,15 @@ export function Home({
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
   const [avatar, setAvatar] = useState<string | undefined>();
+
+  useEffect(() => {
+    const fromQuery = readPinFromQuery();
+    if (fromQuery) {
+      setPin(fromQuery);
+      setStep("join");
+    }
+    clearPinQuery();
+  }, []);
 
   const resetForm = () => {
     setStep("choose");

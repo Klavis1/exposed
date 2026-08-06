@@ -1,3 +1,6 @@
+import { useEffect, useId, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { QRCodeSVG } from "qrcode.react";
 import type { Locale, PlayMode, RoomPublicState } from "@shared/types";
 import { Avatar } from "../components/Avatar";
 import { LanguageToggle } from "../components/LanguageToggle";
@@ -37,6 +40,12 @@ export function Lobby({
     : isVoteoff
       ? t("modeVoteoff")
       : t("modeTea");
+
+  const [qrOpen, setQrOpen] = useState(false);
+  const joinUrl = useMemo(
+    () => `${window.location.origin}/?pin=${encodeURIComponent(room.pin)}`,
+    [room.pin]
+  );
 
   return (
     <Shell>
@@ -89,7 +98,7 @@ export function Lobby({
           )}
         </div>
 
-        <div className="relative w-full shrink-0 rounded-[1.5rem] border-2 border-[var(--color-accent)]/70 bg-[var(--color-surface)] px-3 pb-4 pt-5 text-center shadow-[0_12px_28px_rgba(255,92,106,0.12)]">
+        <div className="relative w-full shrink-0 rounded-[1.5rem] border-2 border-[var(--color-accent)]/70 bg-[var(--color-surface)] px-3 pb-3 pt-5 text-center shadow-[0_12px_28px_rgba(255,92,106,0.12)]">
           <p className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[var(--color-surface)] px-3 text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">
             PIN
           </p>
@@ -105,7 +114,21 @@ export function Lobby({
               </div>
             ))}
           </div>
+          <Button
+            type="button"
+            variant="secondary"
+            className="mt-3 !min-h-11 text-sm"
+            onClick={() => setQrOpen(true)}
+          >
+            {t("showQr")}
+          </Button>
         </div>
+
+        <QrJoinDialog
+          open={qrOpen}
+          joinUrl={joinUrl}
+          onClose={() => setQrOpen(false)}
+        />
 
         <ErrorBanner message={error} />
 
@@ -175,6 +198,74 @@ export function Lobby({
         </div>
       </div>
     </Shell>
+  );
+}
+
+function QrJoinDialog({
+  open,
+  joinUrl,
+  onClose,
+}: {
+  open: boolean;
+  joinUrl: string;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center px-5"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-[#0a090b]/75" aria-hidden />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative z-10 w-full max-w-sm rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.45)] animate-fade-up"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2
+          id={titleId}
+          className="text-center font-display text-xl font-bold tracking-tight text-[var(--color-ink)]"
+        >
+          {t("scanToJoin")}
+        </h2>
+        <div className="mx-auto mt-4 w-fit rounded-2xl bg-white p-4 shadow-sm">
+          <QRCodeSVG
+            value={joinUrl}
+            size={240}
+            level="M"
+            marginSize={0}
+            bgColor="#ffffff"
+            fgColor="#0a090b"
+            title={t("scanToJoin")}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="secondary"
+          className="mt-5"
+          onClick={onClose}
+        >
+          {t("close")}
+        </Button>
+      </div>
+    </div>,
+    document.body
   );
 }
 
