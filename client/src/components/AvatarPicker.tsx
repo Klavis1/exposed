@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { compressImage } from "../lib/avatar";
 import { Avatar } from "./Avatar";
+import { Button } from "./ui";
 
 interface Props {
   name: string;
@@ -14,11 +15,11 @@ export function AvatarPicker({ name, value, onChange, onError }: Props) {
   const [loading, setLoading] = useState(false);
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex items-center justify-center gap-4">
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="group relative rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+        className="group relative shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
         aria-label="Add photo"
       >
         <Avatar name={name || "?"} src={value} size="lg" />
@@ -26,19 +27,20 @@ export function AvatarPicker({ name, value, onChange, onError }: Props) {
           {value ? "Change" : "Add"}
         </span>
       </button>
-      <div className="flex items-center gap-3 text-sm">
-        <button
+      <div className="flex min-w-0 flex-col items-stretch gap-2">
+        <Button
           type="button"
-          className="text-[var(--color-accent-2)] underline-offset-2 hover:underline"
-          onClick={() => inputRef.current?.click()}
+          variant="secondary"
           disabled={loading}
+          onClick={() => inputRef.current?.click()}
+          className="!min-h-11 w-auto px-4 text-sm shadow-[0_6px_18px_rgba(0,0,0,0.2)]"
         >
           {loading ? "Loading…" : value ? "Change photo" : "Add photo"}
-        </button>
+        </Button>
         {value ? (
           <button
             type="button"
-            className="text-[var(--color-muted)] underline-offset-2 hover:underline"
+            className="px-1 text-left text-xs text-[var(--color-muted)] underline-offset-2 hover:text-[var(--color-ink)] hover:underline"
             onClick={() => onChange(undefined)}
           >
             Remove

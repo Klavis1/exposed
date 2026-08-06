@@ -1,7 +1,14 @@
 import { useState, type CSSProperties } from "react";
 import type { PlayMode } from "@shared/types";
 import { AvatarPicker } from "../components/AvatarPicker";
-import { BrandMark, Button, ErrorBanner, Field, Shell } from "../components/ui";
+import {
+  BrandMark,
+  Button,
+  ErrorBanner,
+  Field,
+  PinInput,
+  Shell,
+} from "../components/ui";
 
 interface Props {
   busy: boolean;
@@ -71,7 +78,7 @@ export function Home({
       <div className="flex min-h-0 flex-1 flex-col justify-center gap-5 overflow-y-auto overscroll-contain py-1">
         <div className="shrink-0 space-y-3 animate-fade-up">
           <BrandMark />
-          <p className="max-w-[20rem] text-base leading-snug text-[var(--color-muted)]">
+          <p className="whitespace-nowrap text-center text-sm leading-snug text-[var(--color-muted)]">
             What happens at the cabin, stays at the cabin.
           </p>
           {!connected ? (
@@ -171,9 +178,13 @@ export function Home({
               label="Your nickname"
               value={name}
               maxLength={20}
-              placeholder="e.g. Kasper"
+              placeholder=""
               autoFocus
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) =>
+                setName(
+                  e.target.value.replace(/[^\p{L}\s]/gu, "").slice(0, 20)
+                )
+              }
             />
             <Button type="submit" disabled={busy || !name.trim() || !connected}>
               {busy ? "Creating…" : "Create room"}
@@ -199,15 +210,7 @@ export function Home({
               onJoin(pin, name, avatar);
             }}
           >
-            <Field
-              label="PIN"
-              value={pin}
-              inputMode="numeric"
-              maxLength={4}
-              placeholder="4 digits"
-              autoFocus
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-            />
+            <PinInput value={pin} onChange={setPin} autoFocus />
             <AvatarPicker
               name={name}
               value={avatar}
@@ -221,12 +224,13 @@ export function Home({
               label="Your nickname"
               value={name}
               maxLength={20}
-              placeholder="e.g. Nora"
-              onChange={(e) => setName(e.target.value)}
+              placeholder=""
+              onChange={(e) =>
+                setName(
+                  e.target.value.replace(/[^\p{L}\s]/gu, "").slice(0, 20)
+                )
+              }
             />
-            <p className="text-center text-xs text-[var(--color-muted)]">
-              You can join even if the game already started.
-            </p>
             <Button
               type="submit"
               disabled={busy || !name.trim() || pin.length < 4 || !connected}

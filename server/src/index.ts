@@ -70,6 +70,10 @@ io.on("connection", (socket) => {
       cb?.({ ok: false, error: "Name must be 1–20 characters." });
       return;
     }
+    if (!/^[\p{L}\s]+$/u.test(trimmed) || !/\p{L}/u.test(trimmed)) {
+      cb?.({ ok: false, error: "Name can only use letters." });
+      return;
+    }
     if (
       playMode !== "bakRyggen" &&
       playMode !== "spicy" &&
@@ -103,6 +107,10 @@ io.on("connection", (socket) => {
     const trimmed = (name ?? "").trim();
     if (trimmed.length < 1 || trimmed.length > 20) {
       cb?.({ ok: false, error: "Name must be 1–20 characters." });
+      return;
+    }
+    if (!/^[\p{L}\s]+$/u.test(trimmed) || !/\p{L}/u.test(trimmed)) {
+      cb?.({ ok: false, error: "Name can only use letters." });
       return;
     }
     let safeAvatar: string | undefined;

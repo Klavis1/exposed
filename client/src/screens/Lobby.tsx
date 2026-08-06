@@ -74,15 +74,15 @@ export function Lobby({
           )}
         </div>
 
-        <div className="flex shrink-0 flex-col items-center justify-center rounded-[1.5rem] border-2 border-[var(--color-accent)]/70 bg-[var(--color-surface)] px-3 py-4 text-center shadow-[0_12px_28px_rgba(255,92,106,0.12)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">
+        <div className="relative w-full shrink-0 rounded-[1.5rem] border-2 border-[var(--color-accent)]/70 bg-[var(--color-surface)] px-3 pb-4 pt-5 text-center shadow-[0_12px_28px_rgba(255,92,106,0.12)]">
+          <p className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[var(--color-surface)] px-3 text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">
             PIN
           </p>
-          <div className="mt-3 flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 sm:gap-2.5">
             {[...room.pin].map((digit, i) => (
               <div
                 key={`${digit}-${i}`}
-                className="flex h-14 w-11 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]/70 sm:h-16 sm:w-12"
+                className="flex h-14 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]/70 sm:h-16 sm:w-12"
               >
                 <span className="font-display text-[2.5rem] font-extrabold leading-none tabular-nums text-[var(--color-ink)] sm:text-[2.75rem]">
                   {digit}

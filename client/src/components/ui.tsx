@@ -1,10 +1,12 @@
 import {
   useEffect,
   useId,
+  useRef,
   useState,
   type ButtonHTMLAttributes,
   type CSSProperties,
   type InputHTMLAttributes,
+  type KeyboardEvent,
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
@@ -80,6 +82,112 @@ export function Field({
         {...props}
       />
     </label>
+  );
+}
+
+/** 4-digit PIN entry matching the lobby PIN frames. */
+export function PinInput({
+  value,
+  onChange,
+  autoFocus,
+}: {
+  value: string;
+  onChange: (pin: string) => void;
+  autoFocus?: boolean;
+}) {
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const digits = Array.from({ length: 4 }, (_, i) => value[i] ?? "");
+
+  useEffect(() => {
+    if (!autoFocus) return;
+    inputsRef.current[0]?.focus();
+  }, [autoFocus]);
+
+  const writePin = (nextDigits: string[]) => {
+    onChange(nextDigits.join("").replace(/\D/g, "").slice(0, 4));
+  };
+
+  const focusAt = (index: number) => {
+    const el = inputsRef.current[Math.max(0, Math.min(3, index))];
+    el?.focus();
+    el?.select();
+  };
+
+  const onDigitChange = (index: number, raw: string) => {
+    const cleaned = raw.replace(/\D/g, "");
+    if (!cleaned) {
+      const next = [...digits];
+      next[index] = "";
+      writePin(next);
+      return;
+    }
+    const next = [...digits];
+    next[index] = cleaned.slice(-1);
+    writePin(next);
+    if (index < 3) focusAt(index + 1);
+  };
+
+  const applyPaste = (index: number, text: string) => {
+    const chars = text.replace(/\D/g, "").slice(0, 4).split("");
+    if (!chars.length) return;
+    const next = [...digits];
+    chars.forEach((ch, offset) => {
+      if (index + offset < 4) next[index + offset] = ch;
+    });
+    writePin(next);
+    focusAt(Math.min(3, index + chars.length - 1));
+  };
+
+  const onKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !digits[index] && index > 0) {
+      e.preventDefault();
+      const next = [...digits];
+      next[index - 1] = "";
+      writePin(next);
+      focusAt(index - 1);
+      return;
+    }
+    if (e.key === "ArrowLeft" && index > 0) {
+      e.preventDefault();
+      focusAt(index - 1);
+    }
+    if (e.key === "ArrowRight" && index < 3) {
+      e.preventDefault();
+      focusAt(index + 1);
+    }
+  };
+
+  return (
+    <div className="relative w-full rounded-[1.5rem] border-2 border-[var(--color-accent)]/70 bg-[var(--color-surface)] px-3 pb-4 pt-5 shadow-[0_12px_28px_rgba(255,92,106,0.12)]">
+      <p className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[var(--color-surface)] px-3 text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">
+        PIN
+      </p>
+      <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+        {digits.map((digit, i) => (
+          <input
+            key={i}
+            ref={(el) => {
+              inputsRef.current[i] = el;
+            }}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoComplete={i === 0 ? "one-time-code" : "off"}
+            maxLength={1}
+            aria-label={`PIN digit ${i + 1}`}
+            value={digit}
+            onChange={(e) => onDigitChange(i, e.target.value)}
+            onPaste={(e) => {
+              e.preventDefault();
+              applyPaste(i, e.clipboardData.getData("text"));
+            }}
+            onKeyDown={(e) => onKeyDown(i, e)}
+            onFocus={(e) => e.target.select()}
+            className="h-14 w-11 shrink-0 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]/70 text-center font-display text-[2.5rem] font-extrabold leading-none tabular-nums text-[var(--color-ink)] outline-none focus:border-[var(--color-accent)] sm:h-16 sm:w-12 sm:text-[2.75rem]"
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
