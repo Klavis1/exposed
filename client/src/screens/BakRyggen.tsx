@@ -313,7 +313,7 @@ function RevealPhase({
 
   useEffect(() => {
     setPulse((n) => n + 1);
-  }, [bak.revealIndex, bak.revealStep]);
+  }, [bak.revealIndex]);
 
   if (!current) {
     return (
@@ -327,22 +327,13 @@ function RevealPhase({
   }
 
   const stepLabel =
-    bak.revealStep === "question"
+    current.kind === "question"
       ? "Question"
-      : bak.revealStep === "gossip"
+      : current.kind === "gossip"
         ? "Gossip"
         : "Challenge";
 
-  const body =
-    bak.revealStep === "question"
-      ? current.question
-      : bak.revealStep === "gossip"
-        ? current.gossip
-        : current.challenge;
-
-  const isLast =
-    bak.revealIndex >= bak.revealQueue.length - 1 &&
-    bak.revealStep === "challenge";
+  const isLast = bak.revealIndex >= bak.revealQueue.length - 1;
 
   return (
     <Shell>
@@ -364,7 +355,7 @@ function RevealPhase({
             {stepLabel}
           </p>
           <p className="mt-3 font-display text-xl font-semibold leading-snug sm:text-2xl">
-            {highlightNames(body, playerNames)}
+            {highlightNames(current.text, playerNames)}
           </p>
         </Card>
       </div>

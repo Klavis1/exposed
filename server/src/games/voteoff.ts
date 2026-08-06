@@ -37,6 +37,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+/** Pick a fresh balanced set and shuffle so question order differs every game. */
 function sampleBalanced(deck: VoteOffPrompt[], n: number): VoteOffPrompt[] {
   const versus = shuffle(deck.filter((p) => p.kind === "versus"));
   const yesNo = shuffle(deck.filter((p) => p.kind === "yesNo"));
@@ -99,7 +100,8 @@ function fillPrompt(
 }
 
 export function startVoteOff(playerIds: string[]): VoteOffInternal {
-  const all = voteoffDeck as VoteOffPrompt[];
+  // Copy + shuffle source so each game draws a different order
+  const all = shuffle([...(voteoffDeck as VoteOffPrompt[])]);
   const deck = sampleBalanced(all, QUESTIONS_PER_GAME);
   const state: VoteOffInternal = {
     phase: "voting",

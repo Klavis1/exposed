@@ -1,5 +1,5 @@
 import type {
-  BakRyggenPublicSubmission,
+  BakRyggenRevealCard,
   BakRyggenSubmission,
   RevealStep,
 } from "../../../shared/types.js";
@@ -12,9 +12,8 @@ export interface BakRyggenInternal {
   /** Players expected to submit this writing round (includes mid-round joiners). */
   eligibleWriterIds: string[];
   submissions: Map<string, BakRyggenSubmission>;
-  revealQueue: BakRyggenPublicSubmission[];
+  revealQueue: BakRyggenRevealCard[];
   revealIndex: number;
-  revealStep: RevealStep;
   writingEndsAt: number;
   countdownEndsAt?: number;
 }
@@ -26,22 +25,12 @@ export function startBakRyggen(playerIds: string[]): BakRyggenInternal {
     submissions: new Map(),
     revealQueue: [],
     revealIndex: 0,
-    revealStep: "question",
     writingEndsAt: Date.now() + WRITING_MS,
   };
 }
 
-export function buildRevealQueue(
-  submissions: Map<string, BakRyggenSubmission>
-): BakRyggenPublicSubmission[] {
-  const list: BakRyggenPublicSubmission[] = [...submissions.values()].map(
-    (s) => ({
-      question: s.question,
-      gossip: s.gossip,
-      challenge: s.challenge,
-    })
-  );
-
+function shuffle<T>(arr: T[]): T[] {
+  const list = [...arr];
   for (let i = list.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [list[i], list[j]] = [list[j], list[i]];
@@ -49,21 +38,28 @@ export function buildRevealQueue(
   return list;
 }
 
-const STEPS: RevealStep[] = ["question", "gossip", "challenge"];
-
-export function advanceRevealStep(state: BakRyggenInternal): boolean {
-  const idx = STEPS.indexOf(state.revealStep);
-  if (idx < STEPS.length - 1) {
-    state.revealStep = STEPS[idx + 1];
-    return true;
+/** Flatten every answer into its own card, then shuffle the full deck. */
+export function buildRevealQueue(
+  submissions: Map<string, BakRyggenSubmission>
+): BakRyggenRevealCard[] {
+  const cards: BakRyggenRevealCard[] = [];
+  for (const s of submissions.values()) {
+    const entries: [RevealStep, string][] = [
+      ["question", s.question],
+      ["gossip", s.gossip],
+      ["challenge", s.challenge],
+    ];
+    for (const [kind, text] of entries) {
+      const trimmed = text.trim();
+      if (trimmed) cards.push({ kind, text: trimmed });
+    }
   }
-  return false;
+  return shuffle(cards);
 }
 
 export function advanceRevealIndex(state: BakRyggenInternal): boolean {
   if (state.revealIndex < state.revealQueue.length - 1) {
     state.revealIndex += 1;
-    state.revealStep = "question";
     return true;
   }
   return false;

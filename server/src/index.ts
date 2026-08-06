@@ -15,6 +15,8 @@ import {
   getRoomBySocket,
   joinRoom,
   leaveRoom,
+  rejoinRoom,
+  softDisconnect,
   forceRevealVoteOff,
   nextBakRyggenStep,
   nextSpicy,
@@ -37,6 +39,9 @@ const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: { origin: "*" },
   maxHttpBufferSize: 2e6,
+  // More tolerant of mobile browsers suspending the tab briefly
+  pingInterval: 25_000,
+  pingTimeout: 60_000,
 });
 
 function broadcastRoom(pin: string) {
@@ -121,6 +126,22 @@ io.on("connection", (socket) => {
     broadcastRoom(room.pin);
   });
 
+  socket.on("room:rejoin", ({ pin, playerId }, cb) => {
+    const result = rejoinRoom(
+      socket.id,
+      (pin ?? "").trim(),
+      (playerId ?? "").trim()
+    );
+    if ("error" in result) {
+      cb?.({ ok: false, error: result.error });
+      return;
+    }
+    const { room, playerId: id } = result;
+    socket.join(room.pin);
+    cb?.({ ok: true, playerId: id, pin: room.pin });
+    socket.emit("room:state", toPublicState(room, id));
+  });
+
   socket.on("room:leave", () => {
     const found = getRoomBySocket(socket.id);
     if (!found) return;
@@ -186,18 +207,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("bakRyggen:nextReveal", () => {
-    // Alias: advance full submission (step through remaining then next)
+    // Alias for next reveal card
     const found = getRoomBySocket(socket.id);
     if (!found) return;
-    const game = found.room.bakRyggen;
-    if (!game || found.room.hostId !== found.playerId) {
-      emitError(socket.id, "Only the host can control the reveal.");
+    const err = nextBakRyggenStep(found.room, found.playerId);
+    if (err) {
+      emitError(socket.id, err);
       return;
     }
-    // Jump to next submission
-    game.revealStep = "challenge";
-    const err = nextBakRyggenStep(found.room, found.playerId);
-    if (err) emitError(socket.id, err);
     broadcastRoom(found.room.pin);
   });
 
@@ -246,11 +263,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    const found = getRoomBySocket(socket.id);
-    if (!found) return;
-    const pin = found.room.pin;
-    const room = leaveRoom(socket.id);
-    if (room) broadcastRoom(pin);
+    softDisconnect(socket.id);
   });
 });
 

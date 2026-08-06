@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
@@ -27,12 +27,39 @@ function loadAgeConfirmed(): boolean {
   }
 }
 
-function loadSession(): Session | null {
+function readSession(): Session | null {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
+    const raw =
+      localStorage.getItem(SESSION_KEY) ?? sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Session;
+    if (!parsed?.playerId || !parsed?.pin) return null;
+    return parsed;
   } catch {
     return null;
+  }
+}
+
+function writeSession(session: Session) {
+  const raw = JSON.stringify(session);
+  localStorage.setItem(SESSION_KEY, raw);
+  try {
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function wipeSession() {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* ignore */
+  }
+  try {
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* ignore */
   }
 }
 
@@ -42,18 +69,53 @@ export function useGame() {
   const [ageConfirmed, setAgeConfirmed] = useState(loadAgeConfirmed);
   const [room, setRoom] = useState<RoomPublicState | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(
-    () => loadSession()?.playerId ?? null
+    () => readSession()?.playerId ?? null
   );
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const intentionalLeave = useRef(false);
+  const rejoining = useRef(false);
 
   useEffect(() => {
     const s: AppSocket = io({
       path: "/socket.io",
       autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3000,
     });
 
-    s.on("connect", () => setConnected(true));
+    const tryRejoin = () => {
+      if (intentionalLeave.current || rejoining.current) return;
+      const session = readSession();
+      if (!session) return;
+      rejoining.current = true;
+      s.emit(
+        "room:rejoin",
+        { pin: session.pin, playerId: session.playerId },
+        (res: CreateJoinResult) => {
+          rejoining.current = false;
+          if (!res.ok || !res.playerId || !res.pin) {
+            wipeSession();
+            setPlayerId(null);
+            setRoom(null);
+            return;
+          }
+          setPlayerId(res.playerId);
+          writeSession({
+            playerId: res.playerId,
+            pin: res.pin,
+            name: session.name,
+          });
+        }
+      );
+    };
+
+    s.on("connect", () => {
+      setConnected(true);
+      tryRejoin();
+    });
     s.on("disconnect", () => setConnected(false));
     s.on("room:state", (state) => {
       setRoom(state);
@@ -73,12 +135,12 @@ export function useGame() {
   }, []);
 
   const persistSession = useCallback((session: Session) => {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    writeSession(session);
     setPlayerId(session.playerId);
   }, []);
 
   const clearSession = useCallback(() => {
-    sessionStorage.removeItem(SESSION_KEY);
+    wipeSession();
     setPlayerId(null);
     setRoom(null);
   }, []);
@@ -86,6 +148,7 @@ export function useGame() {
   const createRoom = useCallback(
     (name: string, playMode: PlayMode, avatar?: string) => {
       if (!socket) return;
+      intentionalLeave.current = false;
       setBusy(true);
       setError(null);
       socket.emit(
@@ -107,6 +170,7 @@ export function useGame() {
   const joinRoom = useCallback(
     (pin: string, name: string, avatar?: string) => {
       if (!socket) return;
+      intentionalLeave.current = false;
       setBusy(true);
       setError(null);
       socket.emit(
@@ -126,6 +190,7 @@ export function useGame() {
   );
 
   const leaveRoom = useCallback(() => {
+    intentionalLeave.current = true;
     socket?.emit("room:leave");
     clearSession();
   }, [socket, clearSession]);

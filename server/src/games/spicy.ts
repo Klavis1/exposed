@@ -2,10 +2,10 @@ import spicyDeck from "../../../shared/prompts/spicy.json" with { type: "json" }
 import type { SpicyActiveRule, SpicyChallenge } from "../../../shared/types.js";
 
 export interface SpicyInternal {
-  gapDeck: SpicyChallenge[];
-  ruleDeck: SpicyChallenge[];
-  gapsLeft: number;
-  nextSpecial: "rule" | "repeal";
+  /** Shuffled mix of oneShots, categories, and rules for this game. */
+  drawDeck: SpicyChallenge[];
+  /** Rounds left while a rule is active before its repeal card. */
+  roundsUntilRepeal: number;
   /** Filled text for sticky UI */
   activeRule: SpicyActiveRule | null;
   current: SpicyChallenge | null;
@@ -54,17 +54,16 @@ export function startSpicy(): SpicyInternal {
   const categories = all.filter((c) => c.kind === "category");
   const rules = all.filter((c) => c.kind === "rule");
 
-  // Larger gap pool so each active rule can last 8–16 rounds
-  const gapDeck = shuffle([
+  // Fresh random mix every game — oneshots, categories, and rules interleaved
+  const drawDeck = shuffle([
     ...sample(oneShots, randInt(50, 80)),
     ...sample(categories, randInt(2, 4)),
+    ...sample(rules, randInt(3, 5)),
   ]) as SpicyChallenge[];
 
   return {
-    gapDeck,
-    ruleDeck: sample(rules, randInt(3, 5)) as SpicyChallenge[],
-    gapsLeft: randInt(2, 4),
-    nextSpecial: "rule",
+    drawDeck,
+    roundsUntilRepeal: 0,
     activeRule: null,
     current: null,
     currentTemplate: null,
@@ -106,12 +105,19 @@ function neededPlayers(targets: 0 | 1 | 2 | 3): number {
 
 function takePlayable(
   deck: SpicyChallenge[],
-  playerCount: number
+  playerCount: number,
+  opts?: { excludeRules?: boolean }
 ): SpicyChallenge | null {
-  const idx = deck.findIndex(
-    (c) => neededPlayers(c.targets) <= playerCount || c.targets === 0
-  );
-  if (idx === -1) return null;
+  const playable: number[] = [];
+  for (let i = 0; i < deck.length; i++) {
+    const c = deck[i];
+    if (opts?.excludeRules && c.kind === "rule") continue;
+    if (neededPlayers(c.targets) <= playerCount || c.targets === 0) {
+      playable.push(i);
+    }
+  }
+  if (playable.length === 0) return null;
+  const idx = playable[Math.floor(Math.random() * playable.length)];
   const [card] = deck.splice(idx, 1);
   return card;
 }
@@ -134,47 +140,46 @@ function setCurrent(
   state.targetIds = targetIds;
 }
 
-/** Advance the gap → rule → gap → repeal cycle. */
+function showRepeal(state: SpicyInternal): void {
+  if (!state.activeRule) return;
+  const repeal: SpicyChallenge = {
+    id: `repeal-${state.activeRule.id}`,
+    kind: "repeal",
+    targets: 0,
+    text: `${state.activeRule.text} — cancelled.`,
+  };
+  state.current = repeal;
+  state.currentTemplate = repeal.text;
+  state.currentLetter = undefined;
+  state.targetIds = [];
+  state.activeRule = null;
+  state.roundsUntilRepeal = 0;
+}
+
+/** Draw the next card from the shuffled deck (rules mixed in at random). */
 export function dealNext(state: SpicyInternal, playerIds: string[]): void {
   if (state.phase === "finished") return;
 
-  // Gap cards (oneShots + categories)
-  if (state.gapsLeft > 0 && state.gapDeck.length > 0) {
-    const card = takePlayable(state.gapDeck, playerIds.length);
-    if (card) {
-      state.gapsLeft--;
-      setCurrent(state, card, playerIds);
-      return;
-    }
-    // No playable gap cards left for this player count
-    state.gapsLeft = 0;
+  // Active rule timed out — show repeal before anything else
+  if (state.activeRule && state.roundsUntilRepeal <= 0) {
+    showRepeal(state);
+    return;
   }
 
-  if (state.nextSpecial === "rule") {
-    // Never stack rules — wait until the current one is repealed
+  const excludeRules = !!state.activeRule;
+  const card = takePlayable(state.drawDeck, playerIds.length, { excludeRules });
+
+  if (!card) {
     if (state.activeRule) {
-      state.nextSpecial = "repeal";
-      state.gapsLeft = 0;
-      // fall through to repeal below
-    } else if (state.ruleDeck.length === 0) {
-      finishRound(state);
+      showRepeal(state);
       return;
     }
+    finishRound(state);
+    return;
   }
 
-  if (state.nextSpecial === "rule" && !state.activeRule) {
-    if (state.ruleDeck.length === 0) {
-      finishRound(state);
-      return;
-    }
-    const card = takePlayable(state.ruleDeck, playerIds.length);
-    if (!card) {
-      finishRound(state);
-      return;
-    }
-    // Only one rule at a time — next special is repeal, never another rule
+  if (card.kind === "rule") {
     setCurrent(state, card, playerIds);
-    // filled text + names synced in spicyPublic via syncActiveRuleFilled
     state.activeRule = {
       id: card.id,
       text: card.text,
@@ -182,36 +187,14 @@ export function dealNext(state: SpicyInternal, playerIds: string[]): void {
       targetNames: [],
       targetAvatars: [],
     };
-    state.nextSpecial = "repeal";
-    state.gapsLeft = ruleDurationRounds();
+    state.roundsUntilRepeal = ruleDurationRounds();
     return;
   }
 
-  // Repeal (cannot start a new rule while one is active)
+  setCurrent(state, card, playerIds);
   if (state.activeRule) {
-    const repeal: SpicyChallenge = {
-      id: `repeal-${state.activeRule.id}`,
-      kind: "repeal",
-      targets: 0,
-      text: `${state.activeRule.text} — cancelled.`,
-    };
-    state.current = repeal;
-    state.currentTemplate = repeal.text;
-    state.currentLetter = undefined;
-    state.targetIds = [];
-    state.activeRule = null;
-    state.nextSpecial = "rule";
-    state.gapsLeft = randInt(2, 4);
-
-    if (state.ruleDeck.length === 0) {
-      // Last rule just repealed — round ends on next next, or mark finished after showing repeal
-      // Keep phase playing so repeal card is shown; mark finished when advancing again
-      state.gapsLeft = 0;
-    }
-    return;
+    state.roundsUntilRepeal -= 1;
   }
-
-  finishRound(state);
 }
 
 function finishRound(state: SpicyInternal): void {
@@ -246,9 +229,8 @@ export function syncActiveRuleFilled(
 
 export function remainingCount(state: SpicyInternal): number {
   if (state.phase === "finished") return 0;
-  const pendingRepeal =
-    state.activeRule && state.nextSpecial === "repeal" ? 1 : 0;
-  return state.gapDeck.length + state.ruleDeck.length + pendingRepeal;
+  const pendingRepeal = state.activeRule ? 1 : 0;
+  return state.drawDeck.length + pendingRepeal;
 }
 
 /** Fill {name} / {name1} / {name2} / {letter} in challenge templates. */

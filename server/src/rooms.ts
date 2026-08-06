@@ -11,7 +11,6 @@ import type {
 } from "../../shared/types.js";
 import {
   advanceRevealIndex,
-  advanceRevealStep,
   buildRevealQueue,
   COUNTDOWN_MS,
   startBakRyggen,
@@ -55,6 +54,9 @@ export interface Room {
 
 const rooms = new Map<string, Room>();
 const roomTimers = new Map<string, ReturnType<typeof setTimeout>[]>();
+/** Soft-disconnect grace before removing a player (mobile tab switches). */
+const RECONNECT_GRACE_MS = 60_000;
+const reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 /** Set from index.ts so timed phase changes can broadcast */
 let notifyRoom: (pin: string) => void = () => {};
@@ -63,9 +65,33 @@ export function setRoomNotifier(fn: (pin: string) => void) {
   notifyRoom = fn;
 }
 
+function reconnectKey(pin: string, playerId: string) {
+  return `${pin}:${playerId}`;
+}
+
+function clearReconnectTimer(pin: string, playerId: string) {
+  const key = reconnectKey(pin, playerId);
+  const handle = reconnectTimers.get(key);
+  if (handle) {
+    clearTimeout(handle);
+    reconnectTimers.delete(key);
+  }
+}
+
+function clearReconnectTimersForRoom(pin: string) {
+  for (const key of [...reconnectTimers.keys()]) {
+    if (key.startsWith(`${pin}:`)) {
+      const handle = reconnectTimers.get(key);
+      if (handle) clearTimeout(handle);
+      reconnectTimers.delete(key);
+    }
+  }
+}
+
 function clearRoomTimers(pin: string) {
   for (const t of roomTimers.get(pin) ?? []) clearTimeout(t);
   roomTimers.delete(pin);
+  clearReconnectTimersForRoom(pin);
 }
 
 function scheduleRoom(pin: string, delayMs: number, fn: () => void) {
@@ -98,7 +124,6 @@ function enterCountdown(room: Room) {
 
   game.revealQueue = buildRevealQueue(game.submissions);
   game.revealIndex = 0;
-  game.revealStep = "question";
   game.countdownEndsAt = Date.now() + COUNTDOWN_MS;
   game.phase = "countdown";
 
@@ -124,7 +149,6 @@ function beginReveal(room: Room) {
   game.phase = "reveal";
   game.countdownEndsAt = undefined;
   game.revealIndex = 0;
-  game.revealStep = "question";
 }
 
 /** Advance one reveal card; returns true if game ended → lobby */
@@ -132,7 +156,7 @@ function advanceBakReveal(room: Room): boolean {
   const game = room.bakRyggen;
   if (!game || game.phase !== "reveal") return false;
 
-  if (advanceRevealStep(game) || advanceRevealIndex(game)) {
+  if (advanceRevealIndex(game)) {
     return false;
   }
 
@@ -254,42 +278,19 @@ export function getRoomBySocket(socketId: string): {
   return null;
 }
 
-export function leaveRoom(socketId: string): Room | null {
-  const found = getRoomBySocket(socketId);
-  if (!found) return null;
-  const { room, playerId } = found;
-  room.sockets.delete(socketId);
-
-  // If player still has another socket, keep them
-  const stillConnected = [...room.sockets.values()].includes(playerId);
-  if (!stillConnected) {
-    room.players.delete(playerId);
-    if (room.hostId === playerId) {
-      const next = room.players.values().next().value as Player | undefined;
-      if (next) {
-        room.hostId = next.id;
-        next.isHost = true;
-      }
-    }
-  }
-
+function afterPlayerRemoved(room: Room): Room | null {
   if (room.players.size === 0) {
     clearRoomTimers(room.pin);
     rooms.delete(room.pin);
     return null;
   }
 
-  // If game in progress and too few players, reset to lobby
   if (room.mode !== "lobby" && room.players.size < MIN_PLAYERS) {
     resetRoomToLobby(room);
     return room;
   }
 
-  // Leaving can unblock a round that was waiting on that player.
-  if (
-    room.mode === "bakRyggen" &&
-    room.bakRyggen?.phase === "writing"
-  ) {
+  if (room.mode === "bakRyggen" && room.bakRyggen?.phase === "writing") {
     const required = room.bakRyggen.eligibleWriterIds.filter((id) =>
       room.players.has(id)
     );
@@ -301,7 +302,6 @@ export function leaveRoom(socketId: string): Room | null {
     }
   }
   if (room.mode === "voteoff" && room.voteoff?.phase === "voting") {
-    const playerIds = [...room.players.keys()];
     const needed = room.voteoff.expectedVoterIds.filter((id) =>
       room.players.has(id)
     );
@@ -314,6 +314,92 @@ export function leaveRoom(socketId: string): Room | null {
   }
 
   return room;
+}
+
+function removePlayer(room: Room, playerId: string): Room | null {
+  clearReconnectTimer(room.pin, playerId);
+  room.players.delete(playerId);
+
+  // Drop any leftover sockets for this player
+  for (const [socketId, id] of room.sockets) {
+    if (id === playerId) room.sockets.delete(socketId);
+  }
+
+  if (room.hostId === playerId) {
+    const next = room.players.values().next().value as Player | undefined;
+    if (next) {
+      room.hostId = next.id;
+      next.isHost = true;
+    }
+  }
+
+  return afterPlayerRemoved(room);
+}
+
+/** Explicit leave — remove immediately. */
+export function leaveRoom(socketId: string): Room | null {
+  const found = getRoomBySocket(socketId);
+  if (!found) return null;
+  const { room, playerId } = found;
+  room.sockets.delete(socketId);
+
+  const stillConnected = [...room.sockets.values()].includes(playerId);
+  if (stillConnected) return room;
+
+  return removePlayer(room, playerId);
+}
+
+/**
+ * Unexpected disconnect — keep the player in the room briefly so mobile
+ * tab switches can reconnect without dropping from the game.
+ */
+export function softDisconnect(socketId: string): void {
+  const found = getRoomBySocket(socketId);
+  if (!found) return;
+  const { room, playerId } = found;
+  room.sockets.delete(socketId);
+
+  if ([...room.sockets.values()].includes(playerId)) return;
+
+  const key = reconnectKey(room.pin, playerId);
+  const existing = reconnectTimers.get(key);
+  if (existing) clearTimeout(existing);
+
+  const pin = room.pin;
+  const handle = setTimeout(() => {
+    reconnectTimers.delete(key);
+    const current = rooms.get(pin);
+    if (!current || !current.players.has(playerId)) return;
+    // Someone reconnected under a new socket
+    if ([...current.sockets.values()].includes(playerId)) return;
+    const updated = removePlayer(current, playerId);
+    if (updated) notifyRoom(pin);
+  }, RECONNECT_GRACE_MS);
+
+  reconnectTimers.set(key, handle);
+}
+
+export function rejoinRoom(
+  socketId: string,
+  pin: string,
+  playerId: string
+): { room: Room; playerId: string } | { error: string } {
+  const room = rooms.get(pin.trim());
+  if (!room) return { error: "Room not found. Check the PIN." };
+  if (!room.players.has(playerId)) {
+    return { error: "Session expired. Join again with the PIN." };
+  }
+
+  // Drop any previous socket mapping for this connection
+  room.sockets.delete(socketId);
+  // Ensure this socket isn't double-mapped; replace old sockets for player
+  for (const [sid, id] of [...room.sockets]) {
+    if (id === playerId) room.sockets.delete(sid);
+  }
+
+  clearReconnectTimer(room.pin, playerId);
+  room.sockets.set(socketId, playerId);
+  return { room, playerId };
 }
 
 export function startMode(room: Room, playerId: string): string | null {
@@ -557,7 +643,6 @@ function bakRyggenPublic(
     countdownEndsAt: game.countdownEndsAt,
     revealQueue: game.phase === "reveal" ? game.revealQueue : [],
     revealIndex: game.revealIndex,
-    revealStep: game.revealStep,
   };
 }
 

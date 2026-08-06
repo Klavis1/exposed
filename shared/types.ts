@@ -55,10 +55,10 @@ export interface BakRyggenSubmission {
   challenge: string;
 }
 
-export interface BakRyggenPublicSubmission {
-  question: string;
-  gossip: string;
-  challenge: string;
+/** One revealed answer card (question, gossip, or challenge). */
+export interface BakRyggenRevealCard {
+  kind: RevealStep;
+  text: string;
 }
 
 export interface BakRyggenState {
@@ -70,9 +70,8 @@ export interface BakRyggenState {
   writingEndsAt?: number;
   /** Epoch ms when pre-reveal countdown ends */
   countdownEndsAt?: number;
-  revealQueue: BakRyggenPublicSubmission[];
+  revealQueue: BakRyggenRevealCard[];
   revealIndex: number;
-  revealStep: RevealStep;
 }
 
 export type SpicyKind = "oneShot" | "category" | "rule" | "repeal";
@@ -132,6 +131,10 @@ export interface ClientToServerEvents {
   ) => void;
   "room:join": (
     payload: { pin: string; name: string; avatar?: string },
+    cb?: (res: CreateJoinResult) => void
+  ) => void;
+  "room:rejoin": (
+    payload: { pin: string; playerId: string },
     cb?: (res: CreateJoinResult) => void
   ) => void;
   "room:leave": () => void;
