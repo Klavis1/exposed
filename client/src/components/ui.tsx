@@ -6,7 +6,7 @@ import {
   type ButtonHTMLAttributes,
   type CSSProperties,
   type InputHTMLAttributes,
-  type KeyboardEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
@@ -138,7 +138,10 @@ export function PinInput({
     focusAt(Math.min(3, index + chars.length - 1));
   };
 
-  const onKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (
+    index: number,
+    e: ReactKeyboardEvent<HTMLInputElement>
+  ) => {
     if (e.key === "Backspace" && !digits[index] && index > 0) {
       e.preventDefault();
       const next = [...digits];
@@ -269,7 +272,7 @@ export function ConfirmDialog({
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key === "Escape") onCancel();
     };
     window.addEventListener("keydown", onKey);
