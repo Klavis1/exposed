@@ -85,7 +85,7 @@ export function Home({
           <div className="flex flex-col gap-3 animate-fade-up">
             <Button
               onClick={() => setStep("join")}
-              className="min-h-16 text-lg shadow-[0_14px_36px_rgba(255,92,106,0.38)]"
+              className="min-h-[4.5rem] text-2xl font-bold tracking-wide shadow-[0_14px_36px_rgba(255,92,106,0.38)]"
             >
               Join
             </Button>
