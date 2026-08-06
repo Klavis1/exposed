@@ -14,6 +14,7 @@ export const en = {
   modeSpicy: "Spicy Stakes",
   modeVoteoff: "Voteoff",
   yourNickname: "Your nickname",
+  nicknameExample: "e.g. Melany",
   createRoom: "Create room",
   creating: "Creating…",
   joining: "Joining…",

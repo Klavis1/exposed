@@ -16,6 +16,7 @@ export const no: UiDict = {
   modeSpicy: "Spicy Stakes",
   modeVoteoff: "Voteoff",
   yourNickname: "Kallenavn",
+  nicknameExample: "f.eks. Melany",
   createRoom: "Lag rom",
   creating: "Oppretter…",
   joining: "Blir med…",

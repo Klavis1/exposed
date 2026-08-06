@@ -88,19 +88,21 @@ export function Home({
   onError,
 }: Props) {
   const { locale, setPrefLocale, t } = useI18n();
-  const [step, setStep] = useState<"choose" | "pickMode" | "create" | "join">(
-    "choose"
-  );
+  const [step, setStep] = useState<
+    "choose" | "pickMode" | "create" | "joinPin" | "joinProfile"
+  >("choose");
   const [playMode, setPlayMode] = useState<PlayMode | null>(null);
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
   const [avatar, setAvatar] = useState<string | undefined>();
+  const [joinViaQr, setJoinViaQr] = useState(false);
 
   useEffect(() => {
     const fromQuery = readPinFromQuery();
     if (fromQuery) {
       setPin(fromQuery);
-      setStep("join");
+      setJoinViaQr(true);
+      setStep("joinProfile");
     }
     clearPinQuery();
   }, []);
@@ -108,7 +110,10 @@ export function Home({
   const resetForm = () => {
     setStep("choose");
     setPlayMode(null);
+    setPin("");
+    setName("");
     setAvatar(undefined);
+    setJoinViaQr(false);
     onError(null);
   };
 
@@ -119,30 +124,41 @@ export function Home({
         ? t("modeVoteoff")
         : t("modeTea");
 
+  const hideBrand = step === "joinPin" || step === "joinProfile";
+
   return (
     <Shell>
       <div className="flex min-h-0 flex-1 flex-col justify-center gap-5 overflow-y-auto overscroll-contain py-1">
-        <div className="shrink-0 space-y-3 animate-fade-up">
-          <div className="flex justify-end">
-            <LanguageToggle locale={locale} onChange={setPrefLocale} />
+        {!hideBrand || !connected ? (
+          <div className="shrink-0 space-y-3 animate-fade-up">
+            {!hideBrand ? (
+              <>
+                <div className="flex justify-end">
+                  <LanguageToggle locale={locale} onChange={setPrefLocale} />
+                </div>
+                <BrandMark />
+                <p className="whitespace-nowrap text-center text-sm leading-snug text-[var(--color-muted)]">
+                  {t("tagline")}
+                </p>
+              </>
+            ) : null}
+            {!connected ? (
+              <p className="text-xs text-[var(--color-accent-2)]">
+                {t("connecting")}
+              </p>
+            ) : null}
           </div>
-          <BrandMark />
-          <p className="whitespace-nowrap text-center text-sm leading-snug text-[var(--color-muted)]">
-            {t("tagline")}
-          </p>
-          {!connected ? (
-            <p className="text-xs text-[var(--color-accent-2)]">
-              {t("connecting")}
-            </p>
-          ) : null}
-        </div>
+        ) : null}
 
         <ErrorBanner message={error} />
 
         {step === "choose" ? (
           <div className="flex flex-col gap-3 animate-fade-up">
             <Button
-              onClick={() => setStep("join")}
+              onClick={() => {
+                setJoinViaQr(false);
+                setStep("joinPin");
+              }}
               className="min-h-[4.5rem] text-2xl font-bold tracking-wide shadow-[0_14px_36px_rgba(255,92,106,0.38)]"
             >
               {t("join")}
@@ -229,7 +245,7 @@ export function Home({
               label={t("yourNickname")}
               value={name}
               maxLength={20}
-              placeholder=""
+              placeholder={t("nicknameExample")}
               autoFocus
               onChange={(e) =>
                 setName(
@@ -253,7 +269,27 @@ export function Home({
           </form>
         ) : null}
 
-        {step === "join" ? (
+        {step === "joinPin" ? (
+          <form
+            className="flex flex-col gap-5 animate-fade-up"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (pin.length < 4) return;
+              onError(null);
+              setStep("joinProfile");
+            }}
+          >
+            <PinInput value={pin} onChange={setPin} autoFocus />
+            <Button type="submit" disabled={pin.length < 4 || !connected}>
+              {t("next")}
+            </Button>
+            <Button type="button" variant="ghost" onClick={resetForm}>
+              {t("back")}
+            </Button>
+          </form>
+        ) : null}
+
+        {step === "joinProfile" ? (
           <form
             className="flex flex-col gap-5 animate-fade-up"
             onSubmit={(e) => {
@@ -261,7 +297,6 @@ export function Home({
               onJoin(pin, name, avatar);
             }}
           >
-            <PinInput value={pin} onChange={setPin} autoFocus />
             <AvatarPicker
               name={name}
               value={avatar}
@@ -275,7 +310,8 @@ export function Home({
               label={t("yourNickname")}
               value={name}
               maxLength={20}
-              placeholder=""
+              placeholder={t("nicknameExample")}
+              autoFocus
               onChange={(e) =>
                 setName(
                   e.target.value.replace(/[^\p{L}\s]/gu, "").slice(0, 20)
@@ -288,7 +324,18 @@ export function Home({
             >
               {busy ? t("joining") : t("join")}
             </Button>
-            <Button type="button" variant="ghost" onClick={resetForm}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                onError(null);
+                if (joinViaQr) {
+                  resetForm();
+                  return;
+                }
+                setStep("joinPin");
+              }}
+            >
               {t("back")}
             </Button>
           </form>
