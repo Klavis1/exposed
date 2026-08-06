@@ -148,12 +148,10 @@ function toPct(part: number, total: number) {
 
 function VoterGrid({
   voters,
-  vertical,
   visibleCount,
   revealDone,
 }: {
   voters?: VoteOffPlayerRef[];
-  vertical?: boolean;
   visibleCount: number;
   revealDone: boolean;
 }) {
@@ -167,19 +165,17 @@ function VoterGrid({
     );
   }
 
-  const shown = voters.slice(0, visibleCount);
+  // Always include every voter once the reveal finishes; step in during anim.
+  const count = revealDone
+    ? voters.length
+    : Math.min(voters.length, visibleCount);
+  const shown = voters.slice(0, count);
 
   return (
-    <div
-      className={
-        vertical
-          ? "flex flex-col flex-wrap content-start justify-end gap-1.5"
-          : "flex flex-wrap justify-center gap-1.5"
-      }
-    >
+    <div className="grid grid-cols-2 content-end justify-items-center gap-1">
       {shown.map((v) => (
         <div key={v.id} className="animate-fade-up">
-          <Avatar name={v.name} src={v.avatar} size="sm" />
+          <Avatar name={v.name} src={v.avatar} size="xs" />
         </div>
       ))}
     </div>
@@ -540,10 +536,9 @@ function VerticalBar({
   const visibleCount = showVoters ? revealedSteps : 0;
 
   const voterColumn = showVoters ? (
-    <div className="flex w-10 shrink-0 self-stretch items-end justify-center sm:w-11">
+    <div className="flex w-[3.75rem] shrink-0 items-end justify-center self-end sm:w-16">
       <VoterGrid
         voters={voters}
-        vertical
         visibleCount={visibleCount}
         revealDone={revealDone}
       />
