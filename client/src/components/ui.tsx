@@ -73,13 +73,14 @@ export function Button({
 
 export function Field({
   label,
+  className = "",
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
   return (
     <label className="flex w-full flex-col gap-2 text-sm text-[var(--color-muted)]">
       <span>{label}</span>
       <input
-        className="min-h-12 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 text-base text-[var(--color-ink)] outline-none placeholder:text-[#6d6270] focus:border-[var(--color-accent)]"
+        className={`min-h-12 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-4 text-[16px] text-[var(--color-ink)] outline-none placeholder:text-[#6d6270] focus:border-[var(--color-accent)] ${className}`}
         {...props}
       />
     </label>

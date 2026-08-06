@@ -49,129 +49,125 @@ export function Lobby({
 
   return (
     <Shell>
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
-        <div className="flex shrink-0 items-start justify-between gap-2">
-          <div className="flex-1" />
-          <BrandMark small />
-          <div className="flex flex-1 justify-end">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pb-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1" />
+            <BrandMark small />
+            <div className="flex flex-1 justify-end">
+              {isHost ? (
+                <LanguageToggle locale={room.locale} onChange={onSetLocale} />
+              ) : (
+                <span className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-2)]/80 px-2.5 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+                  {room.locale}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="px-1 text-center">
             {isHost ? (
-              <LanguageToggle locale={room.locale} onChange={onSetLocale} />
+              <div className="grid grid-cols-3 gap-1.5">
+                <ModeOption
+                  src="/tea-time.png?v=2"
+                  label={t("modeTea")}
+                  selected={room.playMode === "bakRyggen"}
+                  accent="var(--color-tea)"
+                  onClick={() => onSetPlayMode("bakRyggen")}
+                />
+                <ModeOption
+                  src="/spicy-stakes.png?v=3"
+                  label={t("modeSpicy")}
+                  selected={isSpicy}
+                  accent="var(--color-accent)"
+                  onClick={() => onSetPlayMode("spicy")}
+                />
+                <ModeOption
+                  src="/voteoff.png?v=1"
+                  label={t("modeVoteoff")}
+                  selected={isVoteoff}
+                  accent="var(--color-category)"
+                  onClick={() => onSetPlayMode("voteoff")}
+                />
+              </div>
             ) : (
-              <span className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-2)]/80 px-2.5 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-muted)]">
-                {room.locale}
-              </span>
+              <img
+                src={modeLogo}
+                alt={modeLabel}
+                className="mx-auto h-auto max-h-16 w-full max-w-[140px] object-contain"
+              />
             )}
           </div>
-        </div>
 
-        <div className="shrink-0 px-1 text-center">
-          {isHost ? (
-            <div className="grid grid-cols-3 gap-1.5">
-              <ModeOption
-                src="/tea-time.png?v=2"
-                label={t("modeTea")}
-                selected={room.playMode === "bakRyggen"}
-                accent="var(--color-tea)"
-                onClick={() => onSetPlayMode("bakRyggen")}
-              />
-              <ModeOption
-                src="/spicy-stakes.png?v=3"
-                label={t("modeSpicy")}
-                selected={isSpicy}
-                accent="var(--color-accent)"
-                onClick={() => onSetPlayMode("spicy")}
-              />
-              <ModeOption
-                src="/voteoff.png?v=1"
-                label={t("modeVoteoff")}
-                selected={isVoteoff}
-                accent="var(--color-category)"
-                onClick={() => onSetPlayMode("voteoff")}
-              />
-            </div>
-          ) : (
-            <img
-              src={modeLogo}
-              alt={modeLabel}
-              className="mx-auto h-auto max-h-24 w-full max-w-[180px] object-contain"
-            />
-          )}
-        </div>
-
-        <div className="relative w-full shrink-0 rounded-[1.5rem] border-2 border-[var(--color-accent)]/70 bg-[var(--color-surface)] px-3 pb-3 pt-5 text-center shadow-[0_12px_28px_rgba(255,92,106,0.12)]">
-          <p className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[var(--color-surface)] px-3 text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">
-            PIN
-          </p>
-          <div className="flex items-center justify-center gap-2 sm:gap-2.5">
-            {[...room.pin].map((digit, i) => (
-              <div
-                key={`${digit}-${i}`}
-                className="flex h-14 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]/70 sm:h-16 sm:w-12"
-              >
-                <span className="font-display text-[2.5rem] font-extrabold leading-none tabular-nums text-[var(--color-ink)] sm:text-[2.75rem]">
-                  {digit}
-                </span>
-              </div>
-            ))}
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            className="mt-3 !min-h-11 text-sm"
-            onClick={() => setQrOpen(true)}
-          >
-            {t("showQr")}
-          </Button>
-        </div>
-
-        <QrJoinDialog
-          open={qrOpen}
-          joinUrl={joinUrl}
-          onClose={() => setQrOpen(false)}
-        />
-
-        <ErrorBanner message={error} />
-
-        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden !p-3">
-          <div className="mb-2 flex shrink-0 items-center justify-between">
-            <p className="text-sm font-medium text-[var(--color-muted)]">
-              {t("inLobby")}
+          <div className="relative w-full rounded-[1.5rem] border-2 border-[var(--color-accent)]/70 bg-[var(--color-surface)] px-3 pb-3 pt-5 text-center shadow-[0_12px_28px_rgba(255,92,106,0.12)]">
+            <p className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[var(--color-surface)] px-3 text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">
+              PIN
             </p>
-            <p className="text-sm text-[var(--color-ink)]">
-              {room.players.length} / {room.maxPlayers}
-            </p>
-          </div>
-          <ul className="grid min-h-0 flex-1 grid-cols-3 content-start gap-2 overflow-y-auto overscroll-contain">
-            {room.players.map((p) => (
-              <li
-                key={p.id}
-                className="flex flex-col items-center gap-1.5 rounded-xl bg-[var(--color-surface-2)] px-1.5 py-2"
-              >
-                <div className="relative">
-                  <Avatar name={p.name} src={p.avatar} size="lg" />
-                  {p.isHost ? (
-                    <img
-                      src="/host-crown.png?v=2"
-                      alt={t("host")}
-                      title={t("host")}
-                      className="absolute -right-2 -top-2 h-9 w-9 object-contain drop-shadow-md"
-                    />
-                  ) : null}
+            <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+              {[...room.pin].map((digit, i) => (
+                <div
+                  key={`${digit}-${i}`}
+                  className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]/70 sm:h-16 sm:w-12"
+                >
+                  <span className="font-display text-[2.15rem] font-extrabold leading-none tabular-nums text-[var(--color-ink)] sm:text-[2.75rem]">
+                    {digit}
+                  </span>
                 </div>
-                <span className="w-full truncate text-center text-xs font-medium leading-tight">
-                  {p.name}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {!ready ? (
-            <p className="mt-2 shrink-0 text-xs text-[var(--color-muted)]">
-              {t("needPlayers", room.minPlayers)}
-            </p>
-          ) : null}
-        </Card>
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              className="mt-3 !min-h-11 text-sm"
+              onClick={() => setQrOpen(true)}
+            >
+              {t("showQr")}
+            </Button>
+          </div>
 
-        <div className="flex shrink-0 flex-col gap-2">
+          <ErrorBanner message={error} />
+
+          <Card className="!p-3">
+            <div className="mb-2.5 flex items-center justify-between">
+              <p className="text-sm font-medium text-[var(--color-muted)]">
+                {t("inLobby")}
+              </p>
+              <p className="text-sm text-[var(--color-ink)]">
+                {room.players.length} / {room.maxPlayers}
+              </p>
+            </div>
+            <ul className="grid grid-cols-4 gap-1.5 sm:grid-cols-3 sm:gap-2">
+              {room.players.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex flex-col items-center gap-1 rounded-xl bg-[var(--color-surface-2)] px-1 py-1.5 sm:gap-1.5 sm:px-1.5 sm:py-2"
+                >
+                  <div className="relative">
+                    <Avatar name={p.name} src={p.avatar} size="md" />
+                    {p.isHost ? (
+                      <img
+                        src="/host-crown.png?v=2"
+                        alt={t("host")}
+                        title={t("host")}
+                        className="absolute -right-1.5 -top-1.5 h-6 w-6 object-contain drop-shadow-md sm:h-8 sm:w-8"
+                      />
+                    ) : null}
+                  </div>
+                  <span className="w-full truncate text-center text-[0.65rem] font-medium leading-tight sm:text-xs">
+                    {p.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {!ready ? (
+              <p className="mt-2 text-xs text-[var(--color-muted)]">
+                {t("needPlayers", room.minPlayers)}
+              </p>
+            ) : null}
+          </Card>
+        </div>
+
+        <div className="flex shrink-0 flex-col gap-2 border-t border-[var(--color-line)]/60 pt-2">
           {isHost ? (
             <Button
               variant={isSpicy || isVoteoff ? "spicy" : "secondary"}
@@ -197,6 +193,12 @@ export function Lobby({
           </Button>
         </div>
       </div>
+
+      <QrJoinDialog
+        open={qrOpen}
+        joinUrl={joinUrl}
+        onClose={() => setQrOpen(false)}
+      />
     </Shell>
   );
 }

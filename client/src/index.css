@@ -46,7 +46,10 @@ body {
 button,
 input,
 textarea {
-  font: inherit;
+  /* Avoid `font: inherit` — it overrides utility font-sizes and can pull
+     14px from labels, which makes iOS Safari zoom on focus. */
+  font-family: inherit;
+  font-weight: inherit;
 }
 
 /* Custom scrollbars — match dark surface / accent look */
