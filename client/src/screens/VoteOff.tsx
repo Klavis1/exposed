@@ -1,4 +1,11 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 import type { VoteOffPlayerRef, VoteOffState } from "@shared/types";
 import { Avatar } from "../components/Avatar";
 import {
@@ -10,6 +17,96 @@ import {
   StopGameButton,
 } from "../components/ui";
 import { useT } from "../i18n/LocaleContext";
+
+const CONFETTI_COLORS = [
+  "#ff5c6a",
+  "#f0c14b",
+  "#7dd3c0",
+  "#4aa3ff",
+  "#ff9b6a",
+  "#4ade9a",
+  "#ffffff",
+];
+
+function ConfettiBurst({ burstKey }: { burstKey: string }) {
+  const pieces = useMemo(() => {
+    return Array.from({ length: 56 }, (_, i) => {
+      const angle = (Math.PI * 2 * i) / 56 + (i % 5) * 0.12;
+      const dist = 160 + (i % 7) * 52 + (i % 3) * 28;
+      const cx = `${Math.cos(angle) * dist}px`;
+      const cy = `${Math.sin(angle) * dist + 80 + (i % 5) * 55}px`;
+      return {
+        id: `${burstKey}-${i}`,
+        style: {
+          "--cx": cx,
+          "--cy": cy,
+          "--rot": `${(i % 2 === 0 ? 1 : -1) * (320 + (i % 8) * 55)}deg`,
+          "--c": CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+          "--w": `${5 + (i % 4)}px`,
+          "--h": `${8 + (i % 5)}px`,
+          // ~3.5–4.5× longer than the original ~1s burst
+          "--dur": `${3.4 + (i % 8) * 0.18}s`,
+          "--delay": `${(i % 12) * 0.035}s`,
+        } as CSSProperties,
+      };
+    });
+  }, [burstKey]);
+
+  return createPortal(
+    <div className="confetti-burst" aria-hidden>
+      {pieces.map((p) => (
+        <span key={p.id} className="confetti-piece" style={p.style} />
+      ))}
+    </div>,
+    document.body
+  );
+}
+
+/** Same fill math as VerticalBar — used to fire confetti when 100% is reached. */
+function animatedBarPct(
+  progress: number,
+  targetPct: number,
+  voteCount: number
+): number {
+  const steps = Math.max(voteCount, 0);
+  if (steps > 0) {
+    const revealedSteps =
+      progress <= 0
+        ? 0
+        : Math.min(steps, Math.ceil(progress * steps));
+    return (revealedSteps / steps) * targetPct;
+  }
+  return progress * targetPct;
+}
+
+/** Match VerticalBar height transition so confetti starts when the bar looks full. */
+const BAR_FILL_TRANSITION_MS = 280;
+
+function useConfettiOnHundred(
+  animKey: string,
+  sweep: boolean,
+  progress: number,
+  winnerVotes: number
+) {
+  const [active, setActive] = useState(false);
+  const hit100 =
+    sweep && animatedBarPct(progress, 100, winnerVotes) >= 100;
+
+  useEffect(() => {
+    setActive(false);
+  }, [animKey]);
+
+  useEffect(() => {
+    if (!hit100 || active) return;
+    const id = window.setTimeout(
+      () => setActive(true),
+      BAR_FILL_TRANSITION_MS
+    );
+    return () => clearTimeout(id);
+  }, [hit100, active]);
+
+  return active;
+}
 
 interface Props {
   voteoff: VoteOffState;
@@ -274,6 +371,7 @@ function ChoiceButton({
 function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
   const t = useT();
   const animKey = `${voteoff.questionIndex}-${voteoff.kind}-${voteoff.prompt}`;
+  const progress = useRevealProgress(animKey);
 
   if (voteoff.kind === "versus" && voteoff.optionA && voteoff.optionB) {
     const a = voteoff.tallyA ?? 0;
@@ -281,11 +379,18 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
     const total = a + b;
     const pctA = toPct(a, total);
     const pctB = toPct(b, total);
+    const sweep = total > 0 && (pctA === 100 || pctB === 100);
+    const winnerVotes = pctA === 100 ? a : pctB === 100 ? b : 0;
     return (
-      <div className="flex flex-col gap-4 animate-card-in">
+      <RevealWithConfetti
+        animKey={animKey}
+        progress={progress}
+        sweep={sweep}
+        winnerVotes={winnerVotes}
+      >
         <div className="flex items-end justify-center gap-5 sm:gap-8">
           <VerticalBar
-            animKey={animKey}
+            progress={progress}
             targetPct={pctA}
             voteCount={a}
             accent="var(--color-accent)"
@@ -299,7 +404,7 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
             aria-hidden
           />
           <VerticalBar
-            animKey={animKey}
+            progress={progress}
             targetPct={pctB}
             voteCount={b}
             accent="var(--color-category)"
@@ -309,7 +414,7 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
             votersSide="right"
           />
         </div>
-      </div>
+      </RevealWithConfetti>
     );
   }
 
@@ -319,9 +424,17 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
     const total = yes + no;
     const pctYes = toPct(yes, total);
     const pctNo = toPct(no, total);
+    const sweep = total > 0 && (pctYes === 100 || pctNo === 100);
+    const winnerVotes = pctYes === 100 ? yes : pctNo === 100 ? no : 0;
 
     return (
-      <div className="flex flex-col items-center gap-4 animate-card-in">
+      <RevealWithConfetti
+        animKey={animKey}
+        progress={progress}
+        sweep={sweep}
+        winnerVotes={winnerVotes}
+        className="items-center"
+      >
         <Avatar
           name={voteoff.subject.name}
           src={voteoff.subject.avatar}
@@ -329,7 +442,7 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
         />
         <div className="flex w-full items-end justify-center gap-5 sm:gap-8">
           <VerticalBar
-            animKey={animKey}
+            progress={progress}
             targetPct={pctYes}
             voteCount={yes}
             accent="var(--color-success)"
@@ -343,7 +456,7 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
             aria-hidden
           />
           <VerticalBar
-            animKey={animKey}
+            progress={progress}
             targetPct={pctNo}
             voteCount={no}
             accent="var(--color-accent)"
@@ -353,15 +466,45 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
             votersSide="left"
           />
         </div>
-      </div>
+      </RevealWithConfetti>
     );
   }
 
   return null;
 }
 
-function VerticalBar({
+function RevealWithConfetti({
   animKey,
+  progress,
+  sweep,
+  winnerVotes,
+  className = "",
+  children,
+}: {
+  animKey: string;
+  progress: number;
+  sweep: boolean;
+  winnerVotes: number;
+  className?: string;
+  children: ReactNode;
+}) {
+  const showConfetti = useConfettiOnHundred(
+    animKey,
+    sweep,
+    progress,
+    winnerVotes
+  );
+
+  return (
+    <div className={`flex flex-col gap-4 animate-card-in ${className}`}>
+      {showConfetti ? <ConfettiBurst burstKey={animKey} /> : null}
+      {children}
+    </div>
+  );
+}
+
+function VerticalBar({
+  progress,
   targetPct,
   voteCount,
   accent,
@@ -371,7 +514,7 @@ function VerticalBar({
   showVoters,
   votersSide = "right",
 }: {
-  animKey: string;
+  progress: number;
   targetPct: number;
   voteCount: number;
   accent: string;
@@ -381,7 +524,6 @@ function VerticalBar({
   showVoters: boolean;
   votersSide?: "left" | "right";
 }) {
-  const progress = useRevealProgress(animKey);
   const steps = Math.max(voteCount, 0);
   const stepped = steps > 0;
   const revealedSteps = stepped

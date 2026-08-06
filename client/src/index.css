@@ -261,3 +261,39 @@ textarea {
 .mode-pick:disabled {
   cursor: default;
 }
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--cx), var(--cy), 0) rotate(var(--rot))
+      scale(0.55);
+  }
+}
+
+.confetti-burst {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: var(--w);
+  height: var(--h);
+  border-radius: 2px;
+  background: var(--c);
+  opacity: 0;
+  animation: confetti-fall var(--dur) cubic-bezier(0.15, 0.75, 0.35, 1) var(--delay)
+    both;
+}
