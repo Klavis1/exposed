@@ -9,6 +9,7 @@ import {
   Shell,
   StopGameButton,
 } from "../components/ui";
+import { useT } from "../i18n/LocaleContext";
 
 interface Props {
   voteoff: VoteOffState;
@@ -59,10 +60,13 @@ function VoterGrid({
   visibleCount: number;
   revealDone: boolean;
 }) {
+  const t = useT();
   if (!voters?.length) {
     if (!revealDone) return null;
     return (
-      <p className="text-center text-xs text-[var(--color-muted)]">Nobody</p>
+      <p className="text-center text-xs text-[var(--color-muted)]">
+        {t("nobody")}
+      </p>
     );
   }
 
@@ -94,25 +98,25 @@ export function VoteOff({
   onForceReveal,
   onEnd,
 }: Props) {
+  const t = useT();
+
   if (voteoff.phase === "finished") {
     return (
       <Shell>
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 text-center">
-          <Pill>Voteoff</Pill>
-          <h1 className="font-display text-3xl font-bold">Round over</h1>
-          <p className="text-sm text-[var(--color-muted)]">
-            That&apos;s all the questions for this Voteoff.
-          </p>
+          <Pill>{t("modeVoteoff")}</Pill>
+          <h1 className="font-display text-3xl font-bold">{t("roundOver")}</h1>
+          <p className="text-sm text-[var(--color-muted)]">{t("voteoffEnd")}</p>
         </div>
         <div className="flex shrink-0 flex-col gap-2">
           {isHost ? (
             <>
-              <Button onClick={onNext}>Back to lobby</Button>
+              <Button onClick={onNext}>{t("backToLobby")}</Button>
               <StopGameButton onStop={onEnd} />
             </>
           ) : (
             <p className="py-2 text-center text-sm text-[var(--color-muted)]">
-              Waiting for the host…
+              {t("waitingHost")}
             </p>
           )}
         </div>
@@ -125,11 +129,11 @@ export function VoteOff({
   return (
     <Shell>
       <div className="flex shrink-0 items-center justify-between gap-2">
-        <Pill>Voteoff</Pill>
+        <Pill>{t("modeVoteoff")}</Pill>
         <div className="flex items-center gap-2">
           {voteoff.anonymous ? (
             <span className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface-2)] px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
-              Anonymous
+              {t("anonymous")}
             </span>
           ) : null}
           <span className="text-xs font-semibold tabular-nums text-[var(--color-muted)]">
@@ -159,8 +163,8 @@ export function VoteOff({
           <>
             <p className="text-center text-sm text-[var(--color-muted)]">
               {voteoff.hasVoted
-                ? `Waiting… ${voteoff.votedCount} / ${voteoff.totalVoters}`
-                : `Vote · ${voteoff.votedCount} / ${voteoff.totalVoters} in`}
+                ? t("waitingVotes", voteoff.votedCount, voteoff.totalVoters)
+                : t("voteProgress", voteoff.votedCount, voteoff.totalVoters)}
             </p>
             {isHost ? (
               <>
@@ -170,7 +174,7 @@ export function VoteOff({
                   onClick={onForceReveal}
                   disabled={voteoff.votedCount === 0}
                 >
-                  Reveal now
+                  {t("revealNow")}
                 </Button>
                 <StopGameButton onStop={onEnd} />
               </>
@@ -180,14 +184,14 @@ export function VoteOff({
           <>
             <Button onClick={onNext}>
               {voteoff.questionIndex + 1 >= voteoff.totalQuestions
-                ? "Done — to lobby"
-                : "Next"}
+                ? t("doneToLobby")
+                : t("next")}
             </Button>
             <StopGameButton onStop={onEnd} />
           </>
         ) : (
           <p className="py-2 text-center text-sm text-[var(--color-muted)]">
-            Host is running Voteoff…
+            {t("hostRunningVoteoff")}
           </p>
         )}
       </div>
@@ -202,10 +206,12 @@ function VotingUI({
   voteoff: VoteOffState;
   onVote: (choiceId: string) => void;
 }) {
+  const t = useT();
+
   if (voteoff.hasVoted) {
     return (
       <p className="text-center text-sm text-[var(--color-muted)] animate-fade-up">
-        Vote locked in.
+        {t("voteLocked")}
       </p>
     );
   }
@@ -234,9 +240,9 @@ function VotingUI({
           size="xl"
         />
         <div className="grid w-full grid-cols-2 gap-3">
-          <Button onClick={() => onVote("yes")}>Yes</Button>
+          <Button onClick={() => onVote("yes")}>{t("yes")}</Button>
           <Button variant="secondary" onClick={() => onVote("no")}>
-            No
+            {t("no")}
           </Button>
         </div>
       </div>
@@ -266,6 +272,7 @@ function ChoiceButton({
 }
 
 function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
+  const t = useT();
   const animKey = `${voteoff.questionIndex}-${voteoff.kind}-${voteoff.prompt}`;
 
   if (voteoff.kind === "versus" && voteoff.optionA && voteoff.optionB) {
@@ -326,7 +333,7 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
             targetPct={pctYes}
             voteCount={yes}
             accent="var(--color-success)"
-            label="Yes"
+            label={t("yes")}
             voters={voteoff.anonymous ? undefined : voteoff.votersForYes}
             showVoters={!voteoff.anonymous}
             votersSide="right"
@@ -340,7 +347,7 @@ function RevealUI({ voteoff }: { voteoff: VoteOffState }) {
             targetPct={pctNo}
             voteCount={no}
             accent="var(--color-accent)"
-            label="No"
+            label={t("no")}
             voters={voteoff.anonymous ? undefined : voteoff.votersForNo}
             showVoters={!voteoff.anonymous}
             votersSide="left"

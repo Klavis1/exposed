@@ -1,7 +1,13 @@
-import spicyDeck from "../../../shared/prompts/spicy.json" with { type: "json" };
-import type { SpicyActiveRule, SpicyChallenge } from "../../../shared/types.js";
+import spicyDeckEn from "../../../shared/prompts/en/spicy.json" with { type: "json" };
+import spicyDeckNo from "../../../shared/prompts/no/spicy.json" with { type: "json" };
+import type {
+  Locale,
+  SpicyActiveRule,
+  SpicyChallenge,
+} from "../../../shared/types.js";
 
 export interface SpicyInternal {
+  locale: Locale;
   /** Shuffled mix of oneShots, categories, and rules for this game. */
   drawDeck: SpicyChallenge[];
   /** Rounds left while a rule is active before its repeal card. */
@@ -48,20 +54,26 @@ function randomLetter(): string {
   return String.fromCharCode(65 + Math.floor(Math.random() * 26));
 }
 
-export function startSpicy(): SpicyInternal {
-  const all = spicyDeck as SeedCard[];
+function deckFor(locale: Locale): SeedCard[] {
+  return (locale === "no" ? spicyDeckNo : spicyDeckEn) as SeedCard[];
+}
+
+export function startSpicy(locale: Locale = "en"): SpicyInternal {
+  const all = deckFor(locale);
   const oneShots = all.filter((c) => c.kind === "oneShot");
   const categories = all.filter((c) => c.kind === "category");
   const rules = all.filter((c) => c.kind === "rule");
 
   // Fresh random mix every game — oneshots, categories, and rules interleaved
+  // Target 30–40 cards total per game
   const drawDeck = shuffle([
-    ...sample(oneShots, randInt(50, 80)),
-    ...sample(categories, randInt(2, 4)),
-    ...sample(rules, randInt(3, 5)),
+    ...sample(oneShots, randInt(26, 33)),
+    ...sample(categories, randInt(2, 3)),
+    ...sample(rules, randInt(2, 4)),
   ]) as SpicyChallenge[];
 
   return {
+    locale,
     drawDeck,
     roundsUntilRepeal: 0,
     activeRule: null,
@@ -146,7 +158,10 @@ function showRepeal(state: SpicyInternal): void {
     id: `repeal-${state.activeRule.id}`,
     kind: "repeal",
     targets: 0,
-    text: `${state.activeRule.text} — cancelled.`,
+    text:
+      state.locale === "no"
+        ? `${state.activeRule.text} — opphevet.`
+        : `${state.activeRule.text} — cancelled.`,
   };
   state.current = repeal;
   state.currentTemplate = repeal.text;

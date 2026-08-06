@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useT } from "../i18n/LocaleContext";
 import { compressImage } from "../lib/avatar";
 import { Avatar } from "./Avatar";
 import { Button } from "./ui";
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function AvatarPicker({ name, value, onChange, onError }: Props) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,11 +22,11 @@ export function AvatarPicker({ name, value, onChange, onError }: Props) {
         type="button"
         onClick={() => inputRef.current?.click()}
         className="group relative shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
-        aria-label="Add photo"
+        aria-label={t("addPhoto")}
       >
         <Avatar name={name || "?"} src={value} size="lg" />
         <span className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/45 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100 group-active:opacity-100">
-          {value ? "Change" : "Add"}
+          {value ? t("change") : t("add")}
         </span>
       </button>
       <div className="flex min-w-0 flex-col items-stretch gap-2">
@@ -35,7 +37,7 @@ export function AvatarPicker({ name, value, onChange, onError }: Props) {
           onClick={() => inputRef.current?.click()}
           className="!min-h-11 w-auto px-4 text-sm shadow-[0_6px_18px_rgba(0,0,0,0.2)]"
         >
-          {loading ? "Loading…" : value ? "Change photo" : "Add photo"}
+          {loading ? t("loading") : value ? t("changePhoto") : t("addPhoto")}
         </Button>
         {value ? (
           <button
@@ -43,7 +45,7 @@ export function AvatarPicker({ name, value, onChange, onError }: Props) {
             className="px-1 text-left text-xs text-[var(--color-muted)] underline-offset-2 hover:text-[var(--color-ink)] hover:underline"
             onClick={() => onChange(undefined)}
           >
-            Remove
+            {t("remove")}
           </button>
         ) : null}
       </div>
@@ -61,7 +63,9 @@ export function AvatarPicker({ name, value, onChange, onError }: Props) {
             const dataUrl = await compressImage(file);
             onChange(dataUrl);
           } catch (err) {
-            onError?.(err instanceof Error ? err.message : "Could not add photo.");
+            onError?.(
+              err instanceof Error ? err.message : t("couldNotAddPhoto")
+            );
           } finally {
             setLoading(false);
           }

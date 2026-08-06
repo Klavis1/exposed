@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { BakRyggenState, RevealStep } from "@shared/types";
 import {
   Button,
@@ -9,6 +9,7 @@ import {
   StopGameButton,
   TextArea,
 } from "../components/ui";
+import { useT } from "../i18n/LocaleContext";
 import { highlightNames } from "../lib/highlightNames";
 
 interface Props {
@@ -25,30 +26,32 @@ interface Props {
   onEnd: () => void;
 }
 
-const WRITE_STEPS: {
-  key: RevealStep;
-  label: string;
-  hint?: string;
-  placeholder: string;
-}[] = [
-  {
-    key: "question",
-    label: "Question",
-    placeholder: "Write a question about a player…",
-  },
-  {
-    key: "gossip",
-    label: "Gossip",
-    hint: "Spill the tea. Name names if you dare.",
-    placeholder: "Write some gossip…",
-  },
-  {
-    key: "challenge",
-    label: "Challenge",
-    hint: "Dare someone — put their name in the text.",
-    placeholder: "Write a challenge…",
-  },
-];
+function useWriteSteps() {
+  const t = useT();
+  return useMemo(
+    () =>
+      [
+        {
+          key: "question" as RevealStep,
+          label: t("teaQuestion"),
+          placeholder: t("teaQuestionPh"),
+        },
+        {
+          key: "gossip" as RevealStep,
+          label: t("teaGossip"),
+          hint: t("teaGossipHint"),
+          placeholder: t("teaGossipPh"),
+        },
+        {
+          key: "challenge" as RevealStep,
+          label: t("teaChallenge"),
+          hint: t("teaChallengeHint"),
+          placeholder: t("teaChallengePh"),
+        },
+      ] as const,
+    [t]
+  );
+}
 
 function useSecondsLeft(endsAt?: number) {
   const [left, setLeft] = useState(() =>
@@ -144,12 +147,14 @@ function WritingPhase({
   onSubmit: Props["onSubmit"];
   onEnd: () => void;
 }) {
+  const t = useT();
+  const writeSteps = useWriteSteps();
   const [stepIndex, setStepIndex] = useState(0);
   const [question, setQuestion] = useState("");
   const [gossip, setGossip] = useState("");
   const [challenge, setChallenge] = useState("");
 
-  const step = WRITE_STEPS[stepIndex];
+  const step = writeSteps[stepIndex];
 
   const value =
     step.key === "question"
@@ -165,22 +170,20 @@ function WritingPhase({
         ? setGossip
         : setChallenge;
 
-  const isLast = stepIndex >= WRITE_STEPS.length - 1;
+  const isLast = stepIndex >= writeSteps.length - 1;
 
   if (bak.hasSubmitted) {
     return (
       <Shell>
         <div className="flex shrink-0 items-center justify-between">
-          <Pill>Tea Time</Pill>
+          <Pill>{t("modeTea")}</Pill>
           <WritingTimer endsAt={bak.writingEndsAt} />
         </div>
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 text-center animate-fade-up">
-          <Pill>
-            {bak.submittedCount} / {bak.totalPlayers} ready
-          </Pill>
-          <h1 className="font-display text-2xl font-bold">You're in</h1>
+          <Pill>{t("readyCount", bak.submittedCount, bak.totalPlayers)}</Pill>
+          <h1 className="font-display text-2xl font-bold">{t("youreIn")}</h1>
           <p className="max-w-xs text-sm text-[var(--color-muted)]">
-            Waiting for everyone else…
+            {t("waitingEveryone")}
           </p>
           <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-[var(--color-surface-2)]">
             <div
@@ -204,9 +207,9 @@ function WritingPhase({
     <Shell>
       <div className="flex shrink-0 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Pill>Tea Time</Pill>
+          <Pill>{t("modeTea")}</Pill>
           <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-tea)]">
-            {stepIndex + 1}/{WRITE_STEPS.length}
+            {stepIndex + 1}/{writeSteps.length}
           </span>
         </div>
         <WritingTimer endsAt={bak.writingEndsAt} />
@@ -230,7 +233,7 @@ function WritingPhase({
         <div className="flex min-h-0 flex-1 flex-col justify-center animate-card-in">
           <TextArea
             label={step.label}
-            hint={step.hint}
+            hint={"hint" in step ? step.hint : undefined}
             placeholder={step.placeholder}
             value={value}
             maxLength={200}
@@ -242,7 +245,7 @@ function WritingPhase({
 
         <div className="flex shrink-0 flex-col gap-2 pt-3">
           <Button type="submit" disabled={!value.trim()}>
-            {isLast ? "Submit" : "Next"}
+            {isLast ? t("submit") : t("next")}
           </Button>
           {stepIndex > 0 ? (
             <Button
@@ -251,7 +254,7 @@ function WritingPhase({
               className="!min-h-10 py-2 text-sm"
               onClick={() => setStepIndex((i) => i - 1)}
             >
-              Back
+              {t("back")}
             </Button>
           ) : null}
           {isHost ? <StopGameButton onStop={onEnd} /> : null}
@@ -270,18 +273,19 @@ function CountdownPhase({
   isHost: boolean;
   onEnd: () => void;
 }) {
+  const t = useT();
   const left = useSecondsLeft(bak.countdownEndsAt);
 
   return (
     <Shell>
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 text-center animate-fade-up">
-        <Pill>Everyone's in</Pill>
-        <h1 className="font-display text-2xl font-bold">Reveal starts in</h1>
+        <Pill>{t("everyonesIn")}</Pill>
+        <h1 className="font-display text-2xl font-bold">{t("revealStartsIn")}</h1>
         <p className="font-display text-[5.5rem] font-extrabold leading-none tabular-nums text-[var(--color-tea)]">
           {left}
         </p>
         <p className="text-sm text-[var(--color-muted)]">
-          {bak.submittedCount} submissions ready
+          {t("submissionsReady", bak.submittedCount)}
         </p>
       </div>
       {isHost ? (
@@ -308,6 +312,7 @@ function RevealPhase({
   onNextStep: () => void;
   onEnd: () => void;
 }) {
+  const t = useT();
   const current = bak.revealQueue[bak.revealIndex];
   const [pulse, setPulse] = useState(0);
 
@@ -319,7 +324,7 @@ function RevealPhase({
     return (
       <Shell>
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          <p>No submissions.</p>
+          <p>{t("noSubmissions")}</p>
           {isHost ? <StopGameButton onStop={onEnd} /> : null}
         </div>
       </Shell>
@@ -328,10 +333,10 @@ function RevealPhase({
 
   const stepLabel =
     current.kind === "question"
-      ? "Question"
+      ? t("teaQuestion")
       : current.kind === "gossip"
-        ? "Gossip"
-        : "Challenge";
+        ? t("teaGossip")
+        : t("teaChallenge");
 
   const isLast = bak.revealIndex >= bak.revealQueue.length - 1;
 
@@ -341,7 +346,7 @@ function RevealPhase({
         <Pill>
           {bak.revealIndex + 1} / {bak.revealQueue.length}
         </Pill>
-        <Pill>Tea Time</Pill>
+        <Pill>{t("modeTea")}</Pill>
       </div>
 
       <ErrorBanner message={error} />
@@ -364,13 +369,13 @@ function RevealPhase({
         {isHost ? (
           <>
             <Button onClick={onNextStep}>
-              {isLast ? "Done — to lobby" : "Next"}
+              {isLast ? t("doneToLobby") : t("next")}
             </Button>
             <StopGameButton onStop={onEnd} />
           </>
         ) : (
           <p className="py-2 text-center text-sm text-[var(--color-muted)]">
-            Host is running the reveal…
+            {t("hostRunningReveal")}
           </p>
         )}
       </div>

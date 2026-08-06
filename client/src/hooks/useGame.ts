@@ -3,10 +3,12 @@ import { io, Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
   CreateJoinResult,
+  Locale,
   PlayMode,
   RoomPublicState,
   ServerToClientEvents,
 } from "@shared/types";
+import { loadLocalePref, t } from "../i18n";
 
 type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -146,18 +148,19 @@ export function useGame() {
   }, []);
 
   const createRoom = useCallback(
-    (name: string, playMode: PlayMode, avatar?: string) => {
+    (name: string, playMode: PlayMode, avatar?: string, locale?: Locale) => {
       if (!socket) return;
       intentionalLeave.current = false;
       setBusy(true);
       setError(null);
+      const createLocale = locale ?? loadLocalePref();
       socket.emit(
         "room:create",
-        { name, avatar, playMode },
+        { name, avatar, playMode, locale: createLocale },
         (res: CreateJoinResult) => {
           setBusy(false);
           if (!res.ok || !res.playerId || !res.pin) {
-            setError(res.error ?? "Could not create room.");
+            setError(res.error ?? t(createLocale, "couldNotCreate"));
             return;
           }
           persistSession({ playerId: res.playerId, pin: res.pin, name });
@@ -179,7 +182,7 @@ export function useGame() {
         (res: CreateJoinResult) => {
           setBusy(false);
           if (!res.ok || !res.playerId || !res.pin) {
-            setError(res.error ?? "Could not join.");
+            setError(res.error ?? t(loadLocalePref(), "couldNotJoin"));
             return;
           }
           persistSession({ playerId: res.playerId, pin: res.pin, name });
@@ -202,6 +205,13 @@ export function useGame() {
   const setPlayMode = useCallback(
     (playMode: PlayMode) => {
       socket?.emit("room:setPlayMode", { playMode });
+    },
+    [socket]
+  );
+
+  const setLocale = useCallback(
+    (locale: Locale) => {
+      socket?.emit("room:setLocale", { locale });
     },
     [socket]
   );
@@ -263,6 +273,7 @@ export function useGame() {
     leaveRoom,
     startMode,
     setPlayMode,
+    setLocale,
     endGame,
     submitBakRyggen,
     nextBakRyggenStep,

@@ -8,7 +8,9 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "../../shared/types.js";
+import { isLocale } from "../../shared/types.js";
 import { normalizeAvatar } from "./avatar.js";
+import { t } from "./i18n.js";
 import {
   createRoom,
   endGame,
@@ -21,6 +23,7 @@ import {
   nextBakRyggenStep,
   nextSpicy,
   nextVoteOff,
+  setLocale,
   setPlayMode,
   setRoomNotifier,
   startMode,
@@ -64,14 +67,15 @@ function emitError(socketId: string, message: string) {
 }
 
 io.on("connection", (socket) => {
-  socket.on("room:create", ({ name, avatar, playMode }, cb) => {
+  socket.on("room:create", ({ name, avatar, playMode, locale }, cb) => {
+    const createLocale = isLocale(locale) ? locale : "en";
     const trimmed = (name ?? "").trim();
     if (trimmed.length < 1 || trimmed.length > 20) {
-      cb?.({ ok: false, error: "Name must be 1–20 characters." });
+      cb?.({ ok: false, error: t(createLocale, "nameLength") });
       return;
     }
     if (!/^[\p{L}\s]+$/u.test(trimmed) || !/\p{L}/u.test(trimmed)) {
-      cb?.({ ok: false, error: "Name can only use letters." });
+      cb?.({ ok: false, error: t(createLocale, "nameLetters") });
       return;
     }
     if (
@@ -79,7 +83,7 @@ io.on("connection", (socket) => {
       playMode !== "spicy" &&
       playMode !== "voteoff"
     ) {
-      cb?.({ ok: false, error: "Choose a game mode." });
+      cb?.({ ok: false, error: t(createLocale, "chooseMode") });
       return;
     }
     let safeAvatar: string | undefined;
@@ -88,7 +92,8 @@ io.on("connection", (socket) => {
     } catch (err) {
       cb?.({
         ok: false,
-        error: err instanceof Error ? err.message : "Invalid image.",
+        error:
+          err instanceof Error ? err.message : t(createLocale, "invalidImage"),
       });
       return;
     }
@@ -96,7 +101,8 @@ io.on("connection", (socket) => {
       socket.id,
       trimmed,
       playMode,
-      safeAvatar
+      safeAvatar,
+      createLocale
     );
     socket.join(room.pin);
     cb?.({ ok: true, playerId, pin: room.pin });
@@ -106,11 +112,11 @@ io.on("connection", (socket) => {
   socket.on("room:join", ({ pin, name, avatar }, cb) => {
     const trimmed = (name ?? "").trim();
     if (trimmed.length < 1 || trimmed.length > 20) {
-      cb?.({ ok: false, error: "Name must be 1–20 characters." });
+      cb?.({ ok: false, error: t(undefined, "nameLength") });
       return;
     }
     if (!/^[\p{L}\s]+$/u.test(trimmed) || !/\p{L}/u.test(trimmed)) {
-      cb?.({ ok: false, error: "Name can only use letters." });
+      cb?.({ ok: false, error: t(undefined, "nameLetters") });
       return;
     }
     let safeAvatar: string | undefined;
@@ -119,7 +125,8 @@ io.on("connection", (socket) => {
     } catch (err) {
       cb?.({
         ok: false,
-        error: err instanceof Error ? err.message : "Invalid image.",
+        error:
+          err instanceof Error ? err.message : t(undefined, "invalidImage"),
       });
       return;
     }
@@ -185,6 +192,17 @@ io.on("connection", (socket) => {
     const found = getRoomBySocket(socket.id);
     if (!found) return;
     const err = setPlayMode(found.room, found.playerId, playMode);
+    if (err) {
+      emitError(socket.id, err);
+      return;
+    }
+    broadcastRoom(found.room.pin);
+  });
+
+  socket.on("room:setLocale", ({ locale }) => {
+    const found = getRoomBySocket(socket.id);
+    if (!found) return;
+    const err = setLocale(found.room, found.playerId, locale);
     if (err) {
       emitError(socket.id, err);
       return;

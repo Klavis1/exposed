@@ -1,3 +1,4 @@
+import { LocaleProvider } from "./i18n/LocaleContext";
 import { useGame } from "./hooks/useGame";
 import { AgeGate } from "./screens/AgeGate";
 import { BakRyggen } from "./screens/BakRyggen";
@@ -9,6 +10,14 @@ import { VoteOff } from "./screens/VoteOff";
 export default function App() {
   const game = useGame();
 
+  return (
+    <LocaleProvider roomLocale={game.room?.locale}>
+      <AppBody game={game} />
+    </LocaleProvider>
+  );
+}
+
+function AppBody({ game }: { game: ReturnType<typeof useGame> }) {
   if (!game.ageConfirmed) {
     return <AgeGate onConfirm={game.confirmAge} />;
   }
@@ -74,6 +83,7 @@ export default function App() {
       error={game.error}
       onStart={game.startMode}
       onSetPlayMode={game.setPlayMode}
+      onSetLocale={game.setLocale}
       onLeave={game.leaveRoom}
     />
   );

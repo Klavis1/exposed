@@ -11,6 +11,7 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "../i18n/LocaleContext";
 
 export function Shell({
   children,
@@ -324,6 +325,7 @@ export function ConfirmDialog({
 /** Host control: confirm before returning everyone to the lobby. */
 export function StopGameButton({ onStop }: { onStop: () => void }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
 
   return (
     <>
@@ -332,14 +334,14 @@ export function StopGameButton({ onStop }: { onStop: () => void }) {
         className="!min-h-10 py-2 text-sm"
         onClick={() => setOpen(true)}
       >
-        Stop game
+        {t("stopGame")}
       </Button>
       <ConfirmDialog
         open={open}
-        title="Stop the game?"
-        message="Everyone will return to the lobby. Progress in this round will be lost."
-        confirmLabel="Yes, stop"
-        cancelLabel="No, keep playing"
+        title={t("stopTitle")}
+        message={t("stopMessage")}
+        confirmLabel={t("stopConfirm")}
+        cancelLabel={t("stopCancel")}
         onConfirm={() => {
           setOpen(false);
           onStop();

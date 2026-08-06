@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
-import type { PlayMode } from "@shared/types";
+import type { Locale, PlayMode } from "@shared/types";
 import { AvatarPicker } from "../components/AvatarPicker";
+import { LanguageToggle } from "../components/LanguageToggle";
 import {
   BrandMark,
   Button,
@@ -9,12 +10,18 @@ import {
   PinInput,
   Shell,
 } from "../components/ui";
+import { useI18n } from "../i18n/LocaleContext";
 
 interface Props {
   busy: boolean;
   error: string | null;
   connected: boolean;
-  onCreate: (name: string, playMode: PlayMode, avatar?: string) => void;
+  onCreate: (
+    name: string,
+    playMode: PlayMode,
+    avatar?: string,
+    locale?: Locale
+  ) => void;
   onJoin: (pin: string, name: string, avatar?: string) => void;
   onError: (message: string | null) => void;
 }
@@ -58,6 +65,7 @@ export function Home({
   onJoin,
   onError,
 }: Props) {
+  const { locale, setPrefLocale, t } = useI18n();
   const [step, setStep] = useState<"choose" | "pickMode" | "create" | "join">(
     "choose"
   );
@@ -73,16 +81,28 @@ export function Home({
     onError(null);
   };
 
+  const modeLabel =
+    playMode === "spicy"
+      ? t("modeSpicy")
+      : playMode === "voteoff"
+        ? t("modeVoteoff")
+        : t("modeTea");
+
   return (
     <Shell>
       <div className="flex min-h-0 flex-1 flex-col justify-center gap-5 overflow-y-auto overscroll-contain py-1">
         <div className="shrink-0 space-y-3 animate-fade-up">
+          <div className="flex justify-end">
+            <LanguageToggle locale={locale} onChange={setPrefLocale} />
+          </div>
           <BrandMark />
           <p className="whitespace-nowrap text-center text-sm leading-snug text-[var(--color-muted)]">
-            What happens at the cabin, stays at the cabin.
+            {t("tagline")}
           </p>
           {!connected ? (
-            <p className="text-xs text-[var(--color-accent-2)]">Connecting…</p>
+            <p className="text-xs text-[var(--color-accent-2)]">
+              {t("connecting")}
+            </p>
           ) : null}
         </div>
 
@@ -94,14 +114,14 @@ export function Home({
               onClick={() => setStep("join")}
               className="min-h-[4.5rem] text-2xl font-bold tracking-wide shadow-[0_14px_36px_rgba(255,92,106,0.38)]"
             >
-              Join
+              {t("join")}
             </Button>
             <Button
               variant="secondary"
               onClick={() => setStep("pickMode")}
               className="min-h-11 text-sm opacity-90"
             >
-              Create game
+              {t("createGame")}
             </Button>
           </div>
         ) : null}
@@ -109,11 +129,11 @@ export function Home({
         {step === "pickMode" ? (
           <div className="flex flex-col gap-4 animate-fade-up">
             <p className="text-sm font-medium text-[var(--color-muted)]">
-              Choose a game mode
+              {t("chooseMode")}
             </p>
             <ModePickButton
               src="/spicy-stakes.png?v=3"
-              label="Spicy Stakes"
+              label={t("modeSpicy")}
               accent="var(--color-accent)"
               onPick={() => {
                 setPlayMode("spicy");
@@ -123,7 +143,7 @@ export function Home({
             />
             <ModePickButton
               src="/tea-time.png?v=2"
-              label="Tea Time"
+              label={t("modeTea")}
               accent="var(--color-tea)"
               onPick={() => {
                 setPlayMode("bakRyggen");
@@ -133,7 +153,7 @@ export function Home({
             />
             <ModePickButton
               src="/voteoff.png?v=1"
-              label="Voteoff"
+              label={t("modeVoteoff")}
               accent="var(--color-category)"
               onPick={() => {
                 setPlayMode("voteoff");
@@ -142,7 +162,7 @@ export function Home({
               }}
             />
             <Button type="button" variant="ghost" onClick={resetForm}>
-              Back
+              {t("back")}
             </Button>
           </div>
         ) : null}
@@ -152,17 +172,17 @@ export function Home({
             className="flex flex-col gap-5 animate-fade-up"
             onSubmit={(e) => {
               e.preventDefault();
-              onCreate(name, playMode, avatar);
+              onCreate(name, playMode, avatar, locale);
             }}
           >
             <p className="text-sm text-[var(--color-muted)]">
-              Mode:{" "}
+              {t("mode")}:{" "}
               <span className="font-semibold text-[var(--color-ink)]">
-                {playMode === "spicy"
-                  ? "Spicy Stakes"
-                  : playMode === "voteoff"
-                    ? "Voteoff"
-                    : "Tea Time"}
+                {modeLabel}
+              </span>
+              {" · "}
+              <span className="font-semibold uppercase text-[var(--color-ink)]">
+                {locale}
               </span>
             </p>
             <AvatarPicker
@@ -175,7 +195,7 @@ export function Home({
               onError={onError}
             />
             <Field
-              label="Your nickname"
+              label={t("yourNickname")}
               value={name}
               maxLength={20}
               placeholder=""
@@ -187,7 +207,7 @@ export function Home({
               }
             />
             <Button type="submit" disabled={busy || !name.trim() || !connected}>
-              {busy ? "Creating…" : "Create room"}
+              {busy ? t("creating") : t("createRoom")}
             </Button>
             <Button
               type="button"
@@ -197,7 +217,7 @@ export function Home({
                 onError(null);
               }}
             >
-              Back
+              {t("back")}
             </Button>
           </form>
         ) : null}
@@ -221,7 +241,7 @@ export function Home({
               onError={onError}
             />
             <Field
-              label="Your nickname"
+              label={t("yourNickname")}
               value={name}
               maxLength={20}
               placeholder=""
@@ -235,10 +255,10 @@ export function Home({
               type="submit"
               disabled={busy || !name.trim() || pin.length < 4 || !connected}
             >
-              {busy ? "Joining…" : "Join"}
+              {busy ? t("joining") : t("join")}
             </Button>
             <Button type="button" variant="ghost" onClick={resetForm}>
-              Back
+              {t("back")}
             </Button>
           </form>
         ) : null}

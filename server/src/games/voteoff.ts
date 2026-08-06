@@ -1,5 +1,11 @@
-import voteoffDeck from "../../../shared/prompts/voteoff.json" with { type: "json" };
-import type { VoteOffKind, VoteOffPhase } from "../../../shared/types.js";
+import voteoffDeckEn from "../../../shared/prompts/en/voteoff.json" with { type: "json" };
+import voteoffDeckNo from "../../../shared/prompts/no/voteoff.json" with { type: "json" };
+import type {
+  Locale,
+  VoteOffKind,
+  VoteOffPhase,
+} from "../../../shared/types.js";
+import { t } from "../i18n.js";
 
 export interface VoteOffPrompt {
   id: string;
@@ -8,6 +14,7 @@ export interface VoteOffPrompt {
 }
 
 export interface VoteOffInternal {
+  locale: Locale;
   phase: VoteOffPhase;
   deck: VoteOffPrompt[];
   questionIndex: number;
@@ -85,25 +92,36 @@ function recordAppearance(
   }
 }
 
+function someone(locale: Locale): string {
+  return locale === "no" ? "Noen" : "Someone";
+}
+
 function fillPrompt(
   template: string,
   kind: VoteOffKind,
-  names: { a?: string; b?: string; subject?: string }
+  names: { a?: string; b?: string; subject?: string },
+  locale: Locale
 ): string {
+  const fallback = someone(locale);
   if (kind === "yesNo") {
-    return template.replaceAll("{name}", names.subject ?? "Someone");
+    return template.replaceAll("{name}", names.subject ?? fallback);
   }
   return template
-    .replaceAll("{name1}", names.a ?? "Someone")
-    .replaceAll("{name2}", names.b ?? "Someone")
-    .replaceAll("{name}", names.a ?? "Someone");
+    .replaceAll("{name1}", names.a ?? fallback)
+    .replaceAll("{name2}", names.b ?? fallback)
+    .replaceAll("{name}", names.a ?? fallback);
 }
 
-export function startVoteOff(playerIds: string[]): VoteOffInternal {
+export function startVoteOff(
+  playerIds: string[],
+  locale: Locale = "en"
+): VoteOffInternal {
+  const source = (locale === "no" ? voteoffDeckNo : voteoffDeckEn) as VoteOffPrompt[];
   // Copy + shuffle source so each game draws a different order
-  const all = shuffle([...(voteoffDeck as VoteOffPrompt[])]);
+  const all = shuffle([...source]);
   const deck = sampleBalanced(all, QUESTIONS_PER_GAME);
   const state: VoteOffInternal = {
+    locale,
     phase: "voting",
     deck,
     questionIndex: 0,
@@ -161,17 +179,22 @@ export function filledPrompt(
   nameById: Map<string, string>
 ): string {
   if (!state.current) return "";
-  return fillPrompt(state.current.text, state.current.kind, {
-    a: state.optionAId
-      ? nameById.get(state.optionAId)
-      : undefined,
-    b: state.optionBId
-      ? nameById.get(state.optionBId)
-      : undefined,
-    subject: state.subjectId
-      ? nameById.get(state.subjectId)
-      : undefined,
-  });
+  return fillPrompt(
+    state.current.text,
+    state.current.kind,
+    {
+      a: state.optionAId
+        ? nameById.get(state.optionAId)
+        : undefined,
+      b: state.optionBId
+        ? nameById.get(state.optionBId)
+        : undefined,
+      subject: state.subjectId
+        ? nameById.get(state.subjectId)
+        : undefined,
+    },
+    state.locale
+  );
 }
 
 function requiredVoters(
@@ -189,16 +212,16 @@ export function castVote(
   playerIds: string[]
 ): string | null {
   if (state.phase !== "voting" || !state.current) {
-    return "Voting is closed.";
+    return t(state.locale, "votingClosed");
   }
-  if (!playerIds.includes(voterId)) return "You are not in this game.";
+  if (!playerIds.includes(voterId)) return t(state.locale, "notInGame");
 
   if (state.current.kind === "versus") {
     if (choiceId !== state.optionAId && choiceId !== state.optionBId) {
-      return "Invalid choice.";
+      return t(state.locale, "invalidChoice");
     }
   } else if (choiceId !== "yes" && choiceId !== "no") {
-    return "Invalid choice.";
+    return t(state.locale, "invalidChoice");
   }
 
   state.votes.set(voterId, choiceId);
@@ -221,8 +244,8 @@ export function expectedVoterCount(
 }
 
 export function forceReveal(state: VoteOffInternal): string | null {
-  if (state.phase !== "voting") return "Not in the voting phase.";
-  if (state.votes.size === 0) return "Need at least one vote.";
+  if (state.phase !== "voting") return t(state.locale, "notVoting");
+  if (state.votes.size === 0) return t(state.locale, "needOneVote");
   state.phase = "reveal";
   return null;
 }
@@ -231,8 +254,8 @@ export function advanceVoteOff(
   state: VoteOffInternal,
   playerIds: string[]
 ): string | null {
-  if (state.phase === "finished") return "The game is over.";
-  if (state.phase !== "reveal") return "Wait for the reveal.";
+  if (state.phase === "finished") return t(state.locale, "gameOver");
+  if (state.phase !== "reveal") return t(state.locale, "waitReveal");
 
   state.questionIndex += 1;
   if (state.questionIndex >= state.deck.length) {

@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type {
   BakRyggenState,
   GameMode,
+  Locale,
   PlayMode,
   Player,
   RoomPublicState,
@@ -9,6 +10,7 @@ import type {
   VoteOffPlayerRef,
   VoteOffState,
 } from "../../shared/types.js";
+import { isLocale } from "../../shared/types.js";
 import {
   advanceRevealIndex,
   buildRevealQueue,
@@ -34,6 +36,7 @@ import {
   tallyVotes,
   type VoteOffInternal,
 } from "./games/voteoff.js";
+import { t } from "./i18n.js";
 
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 20;
@@ -45,6 +48,7 @@ export interface Room {
   players: Map<string, Player>;
   mode: GameMode;
   playMode: PlayMode;
+  locale: Locale;
   bakRyggen?: BakRyggenInternal;
   spicy?: SpicyInternal;
   voteoff?: VoteOffInternal;
@@ -196,7 +200,8 @@ export function createRoom(
   socketId: string,
   name: string,
   playMode: PlayMode,
-  avatar?: string
+  avatar?: string,
+  locale: Locale = "en"
 ): {
   room: Room;
   playerId: string;
@@ -215,6 +220,7 @@ export function createRoom(
     players: new Map([[playerId, player]]),
     mode: "lobby",
     playMode,
+    locale: isLocale(locale) ? locale : "en",
     sockets: new Map([[socketId, playerId]]),
   };
   rooms.set(pin, room);
@@ -228,16 +234,16 @@ export function joinRoom(
   avatar?: string
 ): { room: Room; playerId: string } | { error: string } {
   const room = rooms.get(pin.trim());
-  if (!room) return { error: "Room not found. Check the PIN." };
+  if (!room) return { error: t(undefined, "roomNotFound") };
   if (room.players.size >= MAX_PLAYERS) {
-    return { error: "The room is full." };
+    return { error: t(room.locale, "roomFull") };
   }
   const trimmed = name.trim();
-  if (!trimmed) return { error: "Enter a name." };
+  if (!trimmed) return { error: t(room.locale, "enterName") };
   const taken = [...room.players.values()].some(
     (p) => p.name.toLowerCase() === trimmed.toLowerCase()
   );
-  if (taken) return { error: "That name is already taken." };
+  if (taken) return { error: t(room.locale, "nameTaken") };
 
   const playerId = newPlayerId();
   room.players.set(playerId, {
@@ -385,9 +391,9 @@ export function rejoinRoom(
   playerId: string
 ): { room: Room; playerId: string } | { error: string } {
   const room = rooms.get(pin.trim());
-  if (!room) return { error: "Room not found. Check the PIN." };
+  if (!room) return { error: t(undefined, "roomNotFound") };
   if (!room.players.has(playerId)) {
-    return { error: "Session expired. Join again with the PIN." };
+    return { error: t(room.locale, "sessionExpired") };
   }
 
   // Drop any previous socket mapping for this connection
@@ -403,11 +409,11 @@ export function rejoinRoom(
 }
 
 export function startMode(room: Room, playerId: string): string | null {
-  if (room.hostId !== playerId) return "Only the host can start.";
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostStart");
   if (room.players.size < MIN_PLAYERS) {
-    return `Need at least ${MIN_PLAYERS} players.`;
+    return t(room.locale, "needPlayers", MIN_PLAYERS);
   }
-  if (room.mode !== "lobby") return "A game is already in progress.";
+  if (room.mode !== "lobby") return t(room.locale, "gameInProgress");
 
   clearRoomTimers(room.pin);
   const mode = room.playMode;
@@ -420,18 +426,18 @@ export function startMode(room: Room, playerId: string): string | null {
     room.bakRyggen = startBakRyggen([...room.players.keys()]);
     scheduleWritingDeadline(room);
   } else if (mode === "spicy") {
-    room.spicy = startSpicy();
+    room.spicy = startSpicy(room.locale);
     dealNext(room.spicy, [...room.players.keys()]);
   } else if (mode === "voteoff") {
-    room.voteoff = startVoteOff([...room.players.keys()]);
+    room.voteoff = startVoteOff([...room.players.keys()], room.locale);
   } else {
-    return "Choose a game mode.";
+    return t(room.locale, "chooseMode");
   }
   return null;
 }
 
 export function endGame(room: Room, playerId: string): string | null {
-  if (room.hostId !== playerId) return "Only the host can end the game.";
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostEnd");
   resetRoomToLobby(room);
   return null;
 }
@@ -441,16 +447,28 @@ export function setPlayMode(
   playerId: string,
   playMode: PlayMode
 ): string | null {
-  if (room.hostId !== playerId) return "Only the host can change the mode.";
-  if (room.mode !== "lobby") return "You can only change mode in the lobby.";
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostMode");
+  if (room.mode !== "lobby") return t(room.locale, "changeModeLobby");
   if (
     playMode !== "bakRyggen" &&
     playMode !== "spicy" &&
     playMode !== "voteoff"
   ) {
-    return "Choose a game mode.";
+    return t(room.locale, "chooseMode");
   }
   room.playMode = playMode;
+  return null;
+}
+
+export function setLocale(
+  room: Room,
+  playerId: string,
+  locale: Locale
+): string | null {
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostLocale");
+  if (room.mode !== "lobby") return t(room.locale, "changeLocaleLobby");
+  if (!isLocale(locale)) return t(room.locale, "chooseMode");
+  room.locale = locale;
   return null;
 }
 
@@ -460,15 +478,15 @@ export function submitBakRyggen(
   payload: { question: string; gossip: string; challenge: string }
 ): string | null {
   const game = room.bakRyggen;
-  if (!game || room.mode !== "bakRyggen") return "The game is not active.";
-  if (game.phase !== "writing") return "The writing phase is over.";
-  if (game.submissions.has(playerId)) return "You have already submitted.";
+  if (!game || room.mode !== "bakRyggen") return t(room.locale, "gameNotActive");
+  if (game.phase !== "writing") return t(room.locale, "writingOver");
+  if (game.submissions.has(playerId)) return t(room.locale, "alreadySubmitted");
 
   const question = payload.question.trim();
   const gossip = payload.gossip.trim();
   const challenge = payload.challenge.trim();
   if (!question || !gossip || !challenge) {
-    return "Fill in all fields.";
+    return t(room.locale, "fillFields");
   }
 
   game.submissions.set(playerId, {
@@ -495,16 +513,16 @@ export function submitBakRyggen(
 }
 
 export function nextBakRyggenStep(room: Room, playerId: string): string | null {
-  if (room.hostId !== playerId) return "Only the host can control the reveal.";
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostReveal");
   const game = room.bakRyggen;
-  if (!game || game.phase !== "reveal") return "Not in the reveal phase.";
+  if (!game || game.phase !== "reveal") return t(room.locale, "notReveal");
   advanceBakReveal(room);
   return null;
 }
 
 export function nextSpicy(room: Room, playerId: string): string | null {
-  if (room.hostId !== playerId) return "Only the host can continue.";
-  if (!room.spicy || room.mode !== "spicy") return "The game is not active.";
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostContinue");
+  if (!room.spicy || room.mode !== "spicy") return t(room.locale, "gameNotActive");
   dealNext(room.spicy, [...room.players.keys()]);
   return null;
 }
@@ -515,14 +533,14 @@ export function voteVoteOff(
   choiceId: string
 ): string | null {
   const game = room.voteoff;
-  if (!game || room.mode !== "voteoff") return "The game is not active.";
+  if (!game || room.mode !== "voteoff") return t(room.locale, "gameNotActive");
   return castVote(game, playerId, choiceId, [...room.players.keys()]);
 }
 
 export function nextVoteOff(room: Room, playerId: string): string | null {
-  if (room.hostId !== playerId) return "Only the host can continue.";
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostContinue");
   const game = room.voteoff;
-  if (!game || room.mode !== "voteoff") return "The game is not active.";
+  if (!game || room.mode !== "voteoff") return t(room.locale, "gameNotActive");
   if (game.phase === "finished") {
     resetRoomToLobby(room);
     return null;
@@ -534,9 +552,9 @@ export function forceRevealVoteOff(
   room: Room,
   playerId: string
 ): string | null {
-  if (room.hostId !== playerId) return "Only the host can reveal early.";
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostForceReveal");
   const game = room.voteoff;
-  if (!game || room.mode !== "voteoff") return "The game is not active.";
+  if (!game || room.mode !== "voteoff") return t(room.locale, "gameNotActive");
   return forceReveal(game);
 }
 
@@ -649,8 +667,9 @@ function bakRyggenPublic(
 function spicyPublic(room: Room): SpicyState | undefined {
   const game = room.spicy;
   if (!game) return undefined;
+  const unknown = room.locale === "no" ? "Ukjent" : "Unknown";
   const names = game.targetIds.map(
-    (id) => room.players.get(id)?.name ?? "Unknown"
+    (id) => room.players.get(id)?.name ?? unknown
   );
   const avatars = game.targetIds.map((id) => room.players.get(id)?.avatar);
 
@@ -675,7 +694,7 @@ function spicyPublic(room: Room): SpicyState | undefined {
         {
           ...game.activeRule,
           targetNames: game.activeRule.targetIds.map(
-            (id) => room.players.get(id)?.name ?? "Unknown"
+            (id) => room.players.get(id)?.name ?? unknown
           ),
           targetAvatars: game.activeRule.targetIds.map(
             (id) => room.players.get(id)?.avatar
@@ -689,6 +708,7 @@ function spicyPublic(room: Room): SpicyState | undefined {
     targetIds: game.targetIds,
     targetNames: names,
     targetAvatars: avatars,
+    letter: game.currentLetter,
     remaining: remainingCount(game),
     activeRules,
     phase: game.phase,
@@ -704,6 +724,7 @@ export function toPublicState(room: Room, viewerId: string): RoomPublicState {
     })),
     mode: room.mode,
     playMode: room.playMode,
+    locale: room.locale,
     minPlayers: MIN_PLAYERS,
     maxPlayers: MAX_PLAYERS,
     bakRyggen: bakRyggenPublic(room, viewerId),

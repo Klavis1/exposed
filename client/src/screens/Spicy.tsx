@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SpicyKind, SpicyState } from "@shared/types";
 import { Avatar } from "../components/Avatar";
 import {
@@ -9,6 +9,7 @@ import {
   Shell,
   StopGameButton,
 } from "../components/ui";
+import { useT } from "../i18n/LocaleContext";
 import { highlightNames } from "../lib/highlightNames";
 
 interface Props {
@@ -20,37 +21,44 @@ interface Props {
   onEnd: () => void;
 }
 
-const KIND_META: Record<
-  Exclude<SpicyKind, "oneShot"> | "challenge",
-  { label: string; accent: string; tint: string }
-> = {
-  challenge: {
-    label: "Challenge",
-    accent: "var(--color-accent)",
-    tint: "rgba(255, 92, 106, 0.1)",
-  },
-  category: {
-    label: "Category",
-    accent: "var(--color-category)",
-    tint: "rgba(240, 193, 75, 0.1)",
-  },
-  rule: {
-    label: "New Rule",
-    accent: "var(--color-rule)",
-    tint: "rgba(125, 211, 192, 0.1)",
-  },
-  repeal: {
-    label: "Rule cancelled",
-    accent: "var(--color-muted)",
-    tint: "rgba(154, 144, 136, 0.08)",
-  },
-};
+function useKindMeta() {
+  const t = useT();
+  return useMemo(
+    () =>
+      ({
+        challenge: {
+          label: t("challenge"),
+          accent: "var(--color-accent)",
+          tint: "rgba(255, 92, 106, 0.1)",
+        },
+        category: {
+          label: t("category"),
+          accent: "var(--color-category)",
+          tint: "rgba(240, 193, 75, 0.1)",
+        },
+        rule: {
+          label: t("newRule"),
+          accent: "var(--color-rule)",
+          tint: "rgba(125, 211, 192, 0.1)",
+        },
+        repeal: {
+          label: t("ruleCancelled"),
+          accent: "var(--color-muted)",
+          tint: "rgba(154, 144, 136, 0.08)",
+        },
+      }) as const,
+    [t]
+  );
+}
 
-function metaFor(kind: SpicyKind | undefined) {
-  if (kind === "category") return KIND_META.category;
-  if (kind === "rule") return KIND_META.rule;
-  if (kind === "repeal") return KIND_META.repeal;
-  return KIND_META.challenge;
+function metaFor(
+  kind: SpicyKind | undefined,
+  meta: ReturnType<typeof useKindMeta>
+) {
+  if (kind === "category") return meta.category;
+  if (kind === "rule") return meta.rule;
+  if (kind === "repeal") return meta.repeal;
+  return meta.challenge;
 }
 
 export function Spicy({
@@ -61,6 +69,8 @@ export function Spicy({
   onNext,
   onEnd,
 }: Props) {
+  const t = useT();
+  const KIND_META = useKindMeta();
   const finished = spicy.phase === "finished";
   const [cardPulse, setCardPulse] = useState(0);
 
@@ -68,15 +78,25 @@ export function Spicy({
     setCardPulse((n) => n + 1);
   }, [spicy.challenge?.id, spicy.phase]);
 
-  const meta = metaFor(spicy.challenge?.kind);
+  const meta = metaFor(spicy.challenge?.kind, KIND_META);
+  const kind = spicy.challenge?.kind;
+  const framed = !finished && (kind === "rule" || kind === "category");
+  const challengeText = (() => {
+    const raw = spicy.challenge?.text ?? t("loading");
+    if (kind === "category") {
+      return raw.replace(/^(Category|Kategori):\s*/i, "");
+    }
+    return raw;
+  })();
 
   return (
     <Shell>
       <div className="flex shrink-0 items-center justify-between">
-        <Pill>Spicy Stakes</Pill>
+        <Pill>{t("modeSpicy")}</Pill>
         {!finished &&
-        spicy.challenge?.kind !== "rule" &&
-        spicy.challenge?.kind !== "repeal" ? (
+        kind !== "rule" &&
+        kind !== "category" &&
+        kind !== "repeal" ? (
           <p
             className="text-xs font-semibold uppercase tracking-[0.18em]"
             style={{ color: meta.accent }}
@@ -99,7 +119,7 @@ export function Spicy({
             className="text-[0.65rem] font-semibold uppercase tracking-[0.18em]"
             style={{ color: "var(--color-rule)" }}
           >
-            Active rules
+            {t("activeRules")}
           </p>
           <ul className="mt-1.5 flex flex-col gap-1.5">
             {spicy.activeRules.map((rule) => (
@@ -130,61 +150,82 @@ export function Spicy({
       <div className="flex min-h-0 flex-1 flex-col justify-center gap-2">
         {finished ? (
           <h1 className="text-center font-display text-2xl font-bold tracking-tight">
-            Round over
+            {t("roundOver")}
           </h1>
         ) : null}
-        {!finished && spicy.challenge?.kind === "rule" ? (
+        {!finished && kind === "rule" ? (
           <p
             className="shrink-0 text-center font-display text-3xl font-extrabold uppercase tracking-[0.12em]"
             style={{ color: meta.accent }}
           >
-            New Rule
+            {t("newRule")}
           </p>
         ) : null}
-        {!finished && spicy.challenge?.kind === "repeal" ? (
+        {!finished && kind === "category" ? (
+          <p
+            className="shrink-0 text-center font-display text-3xl font-extrabold uppercase tracking-[0.12em]"
+            style={{ color: meta.accent }}
+          >
+            {t("category")}
+          </p>
+        ) : null}
+        {!finished && kind === "repeal" ? (
           <p className="shrink-0 text-center font-display text-3xl font-extrabold uppercase tracking-[0.12em] text-[var(--color-accent)]">
-            Rule Over
+            {t("ruleOver")}
           </p>
         ) : null}
 
         <Card
           key={cardPulse}
-          className="animate-bubble-swap flex w-full shrink-0 flex-col overflow-hidden !border-[var(--color-line)] !p-0"
+          className={`animate-bubble-swap flex w-full shrink-0 flex-col overflow-hidden !p-0 ${
+            framed ? "!border-2" : "!border-[var(--color-line)]"
+          }`}
           style={
             finished
               ? undefined
-              : {
-                  borderLeftWidth: 4,
-                  borderLeftColor: meta.accent,
-                  background: `linear-gradient(105deg, ${meta.tint} 0%, var(--color-surface) 42%)`,
-                }
+              : framed
+                ? {
+                    borderColor: meta.accent,
+                    boxShadow:
+                      kind === "category"
+                        ? `0 0 0 1px ${meta.accent}, 0 12px 32px rgba(240, 193, 75, 0.22)`
+                        : `0 0 0 1px ${meta.accent}, 0 12px 32px rgba(125, 211, 192, 0.18)`,
+                    background: `linear-gradient(105deg, ${meta.tint} 0%, var(--color-surface) 42%)`,
+                  }
+                : {
+                    borderLeftWidth: 4,
+                    borderLeftColor: meta.accent,
+                    background: `linear-gradient(105deg, ${meta.tint} 0%, var(--color-surface) 42%)`,
+                  }
           }
         >
           <div className="shrink-0 px-4 py-2.5">
             <p className="line-clamp-3 font-display text-base font-semibold leading-snug text-[var(--color-ink)] sm:text-lg">
               {finished
-                ? "That's the end of this Spicy round."
-                : highlightNames(
-                    spicy.challenge?.text ?? "Loading…",
-                    playerNames
-                  )}
+                ? t("spicyEnd")
+                : highlightNames(challengeText, playerNames, {
+                    letter: kind === "category" ? spicy.letter : undefined,
+                  })}
             </p>
           </div>
           {!finished && spicy.targetNames.length > 0 ? (
             <div
-              className="grid w-full shrink-0 border-t border-[var(--color-line)]"
-              style={{
-                aspectRatio: "1 / 1",
-                gridTemplateColumns: `repeat(${spicy.targetNames.length}, minmax(0, 1fr))`,
-              }}
+              className={`grid w-full shrink-0 gap-2 border-t border-[var(--color-line)] bg-[var(--color-surface)]/40 p-2.5 ${
+                spicy.targetNames.length >= 3
+                  ? "grid-cols-3"
+                  : "grid-cols-2"
+              }`}
             >
               {spicy.targetNames.map((name, i) => {
                 const src = spicy.targetAvatars?.[i];
                 const initial = (name.trim()[0] ?? "?").toUpperCase();
+                const alone = spicy.targetNames.length === 1;
                 return (
                   <div
                     key={`${spicy.targetIds[i]}-${name}`}
-                    className="relative min-h-0 min-w-0 overflow-hidden bg-gradient-to-br from-[var(--color-accent)]/80 to-[var(--color-gossip)]/80"
+                    className={`relative aspect-square min-w-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--color-accent)]/80 to-[var(--color-gossip)]/80 shadow-[0_8px_20px_rgba(0,0,0,0.28)] ring-1 ring-[var(--color-line)] ${
+                      alone ? "col-span-2 mx-auto w-[calc(50%-0.25rem)]" : ""
+                    }`}
                   >
                     {src ? (
                       <img
@@ -210,16 +251,14 @@ export function Spicy({
           <>
             {!finished ? (
               <Button variant="spicy" onClick={onNext}>
-                Next
+                {t("next")}
               </Button>
             ) : null}
             <StopGameButton onStop={onEnd} />
           </>
         ) : (
           <p className="py-2 text-center text-sm text-[var(--color-muted)]">
-            {finished
-              ? "Waiting for the host…"
-              : "Host is running the challenges…"}
+            {finished ? t("waitingHost") : t("hostRunningChallenges")}
           </p>
         )}
       </div>

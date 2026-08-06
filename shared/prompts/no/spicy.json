@@ -1,0 +1,782 @@
+[
+  {
+    "id": "s1",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må vise sin favorittsexstilling med {name2}."
+  },
+  {
+    "id": "s2",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må gi {name2} et konstruktivt kompliment."
+  },
+  {
+    "id": "s3",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må holde øyekontakt med {name2} i 10 sekunder."
+  },
+  {
+    "id": "s4",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må rate {name2}s saftige rumpe."
+  },
+  {
+    "id": "s5",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må sakte-danse med {name2}."
+  },
+  {
+    "id": "s6",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må bytte drink med {name2}."
+  },
+  {
+    "id": "s7",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må la {name2} velge neste drink."
+  },
+  {
+    "id": "s8",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må fortelle {name2} sitt førsteinntrykk av dem."
+  },
+  {
+    "id": "s9",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må lese den siste tekstmeldingen sin høyt."
+  },
+  {
+    "id": "s10",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må kysse {name2} på kinnet."
+  },
+  {
+    "id": "s11",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må rate {name2}s armhuler."
+  },
+  {
+    "id": "s12",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må rate {name2}s kragebein."
+  },
+  {
+    "id": "s13",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må sende en dirty melding på telefonen til {name2}."
+  },
+  {
+    "id": "s14",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må vise de tre siste bildene i kamerarullen."
+  },
+  {
+    "id": "s15",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må vise den siste selfien sin."
+  },
+  {
+    "id": "s16",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må gjette {name2}s største turn-on."
+  },
+  {
+    "id": "s17",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må beskrive {name2} med bare tre spicy adjektiver."
+  },
+  {
+    "id": "s18",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må rate {name2}s stemme."
+  },
+  {
+    "id": "s19",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må stjele en slurk fra noen sin drink."
+  },
+  {
+    "id": "s20",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må mate {name2} med en slurk av drinken sin."
+  },
+  {
+    "id": "s21",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må navngi noen her de ville kysset."
+  },
+  {
+    "id": "s22",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må navngi noen her de ville ligget med."
+  },
+  {
+    "id": "s23",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må beskrive {name2}s sexappeal med 3 ord."
+  },
+  {
+    "id": "s24",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må gjette {name2}s body count."
+  },
+  {
+    "id": "s25",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må avsløre body counten sin."
+  },
+  {
+    "id": "s26",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må stille {name2} et hvilket som helst ja/nei-spørsmål."
+  },
+  {
+    "id": "s27",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må la {name2} spørre dem om hva som helst — de må svare."
+  },
+  {
+    "id": "s28",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må mime favorittsexstillingen sin."
+  },
+  {
+    "id": "s29",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må lære {name2} hvordan de kysser — i lufta."
+  },
+  {
+    "id": "s30",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må fortelle {name2} hva typen deres er — og om {name2} passer."
+  },
+  {
+    "id": "s31",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må innrømme om de noen gang har stalket {name2} online."
+  },
+  {
+    "id": "s32",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må gi {name2} en klem."
+  },
+  {
+    "id": "s33",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må gi {name2} en 20-sekunders skuldermassasje."
+  },
+  {
+    "id": "s34",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må la {name2} sende én melding fra telefonen deres."
+  },
+  {
+    "id": "s35",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må si hva som tenter dem."
+  },
+  {
+    "id": "s36",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må innrømme sin største turn-on."
+  },
+  {
+    "id": "s37",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må innrømme sin største turn-off."
+  },
+  {
+    "id": "s38",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må rangere alle fra mest uskyldig til mest freaky."
+  },
+  {
+    "id": "s39",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må innrømme sitt nyeste kjendis-crush."
+  },
+  {
+    "id": "s40",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må avsløre et rykte de har hørt om {name2}."
+  },
+  {
+    "id": "s41",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må beskrive {name2} med en sangtittel."
+  },
+  {
+    "id": "s42",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må finne på en datingapp-bio for {name2}."
+  },
+  {
+    "id": "s43",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må vise oss sin beste sexy walk."
+  },
+  {
+    "id": "s44",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må gjøre en 10-sekunders sexy dans."
+  },
+  {
+    "id": "s45",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må gjøre én armheving mens de stønner."
+  },
+  {
+    "id": "s46",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må vise {name2} det nyeste søket i søkehistorikken sin."
+  },
+  {
+    "id": "s47",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må roaste {name2} i 10 sekunder — og så komplimentere dem."
+  },
+  {
+    "id": "s48",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du har sendt nudes, drikk."
+  },
+  {
+    "id": "s49",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du har kysset noen i dette rommet, drikk."
+  },
+  {
+    "id": "s50",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har hatt one-night stand, drikk."
+  },
+  {
+    "id": "s51",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har ghostet noen etter et hookup, drikk."
+  },
+  {
+    "id": "s52",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må vise gruppa det nyeste bildet sitt av en person."
+  },
+  {
+    "id": "s53",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må komplimentere {name2}s antrekk — gjør det flirty."
+  },
+  {
+    "id": "s54",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du har made out med mer enn én person på én natt, drikk."
+  },
+  {
+    "id": "s55",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har hatt crush på en venns søsken, drikk."
+  },
+  {
+    "id": "s56",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har løyet om body counten din, drikk."
+  },
+  {
+    "id": "s57",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må la {name2} sette en dare for dem akkurat nå."
+  },
+  {
+    "id": "s58",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du har hooket up med en venns ex, drikk."
+  },
+  {
+    "id": "s59",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har hatt sex utendørs, drikk."
+  },
+  {
+    "id": "s60",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har blitt med i mile-high club, drikk."
+  },
+  {
+    "id": "s61",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må stønne sitt eget navn."
+  },
+  {
+    "id": "s62",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har faket det, drikk."
+  },
+  {
+    "id": "s63",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må velge et kjælenavn til {name2} og bruke det én gang."
+  },
+  {
+    "id": "s64",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må kalle {name2} hot uten å le."
+  },
+  {
+    "id": "s65",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du har kysset noen innen 24 timer etter at dere møttes, drikk."
+  },
+  {
+    "id": "s66",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har hatt friends-with-benefits, drikk."
+  },
+  {
+    "id": "s67",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du har brukt en datingapp denne måneden, drikk."
+  },
+  {
+    "id": "s68",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har blitt tatt på fersk gjerning, drikk. Storytime!"
+  },
+  {
+    "id": "s69",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har fortsatt å være venn med en ex, drikk."
+  },
+  {
+    "id": "s70",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må fortelle {name2} det første de la merke til med dem."
+  },
+  {
+    "id": "s71",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har lastet ned en datingapp igjen etter å ha slettet den, drikk."
+  },
+  {
+    "id": "s72",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har hatt crush på en kollega, drikk."
+  },
+  {
+    "id": "s73",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må fortelle {name2} hvor de ville kysset dem først."
+  },
+  {
+    "id": "s74",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har googlet hvordan man knytter slips, drikk."
+  },
+  {
+    "id": "s75",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må vise sitt beste «kom hit»-ansikt."
+  },
+  {
+    "id": "s76",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må fortelle oss sin beste pickup-line."
+  },
+  {
+    "id": "s77",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har slettet meldinger så noen ikke skulle se dem, drikk."
+  },
+  {
+    "id": "s78",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må si om de ville datet {name2} i et annet liv — ja eller nei."
+  },
+  {
+    "id": "s79",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må fake et romantisk frieri til {name2}."
+  },
+  {
+    "id": "s80",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har vært forelsket i noen som ikke elsket deg tilbake, drikk."
+  },
+  {
+    "id": "s81",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har sjekket noens story mer enn én gang på en dag, drikk."
+  },
+  {
+    "id": "s82",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har søkt opp noen etter å ha møtt dem én gang, drikk."
+  },
+  {
+    "id": "s83",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må spørre {name2}: «Har du noen gang tenkt på meg sånn?»"
+  },
+  {
+    "id": "s84",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du allerede har kysset noen i kveld, drikk."
+  },
+  {
+    "id": "s85",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har dratt hjem med noen fra en fest, drikk."
+  },
+  {
+    "id": "s86",
+    "kind": "oneShot",
+    "targets": 1,
+    "text": "{name} må fullføre setningen: «I kveld vil jeg…»"
+  },
+  {
+    "id": "s87",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må fullføre setningen til {name2}: «Hvis vi var alene…»"
+  },
+  {
+    "id": "s88",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har lest noens meldinger uten å spørre, drikk."
+  },
+  {
+    "id": "s89",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har grindet med noen du ikke datet, drikk."
+  },
+  {
+    "id": "s90",
+    "kind": "oneShot",
+    "targets": 2,
+    "text": "{name1} må smøre leppestift / leppepomade på {name2} (eller mime det)."
+  },
+  {
+    "id": "s91",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har bitt noen i leppa med vilje, drikk."
+  },
+  {
+    "id": "s92",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du er for mye i senga, drikk."
+  },
+  {
+    "id": "s93",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har måttet snike deg ut om morgenen, drikk."
+  },
+  {
+    "id": "s94",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har blacket ut og fortsatt kommet deg hjem, drikk."
+  },
+  {
+    "id": "s95",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har ghostet etter et hookup, drikk."
+  },
+  {
+    "id": "s96",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har tatt screenshot av en nude du fikk, drikk."
+  },
+  {
+    "id": "s97",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har sagt feil navn under sex, drikk."
+  },
+  {
+    "id": "s98",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har liket noens story bare for å få oppmerksomheten deres, drikk."
+  },
+  {
+    "id": "s99",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har hooket up med noen bare for å gjøre noen andre sjalu, drikk."
+  },
+  {
+    "id": "s100",
+    "kind": "oneShot",
+    "targets": 0,
+    "text": "Hvis du noen gang har gitt noen et sugemerke, drikk."
+  },
+  {
+    "id": "c1",
+    "kind": "category",
+    "targets": 1,
+    "text": "Sexstillinger. {name} starter."
+  },
+  {
+    "id": "c2",
+    "kind": "category",
+    "targets": 1,
+    "text": "Synonymer for å onanere. {name} starter."
+  },
+  {
+    "id": "c3",
+    "kind": "category",
+    "targets": 1,
+    "text": "Synonymer for sex. {name} starter."
+  },
+  {
+    "id": "c4",
+    "kind": "category",
+    "targets": 1,
+    "text": "Bilmerker. {name} starter."
+  },
+  {
+    "id": "c5",
+    "kind": "category",
+    "targets": 1,
+    "text": "Kollegaers navn. {name} starter."
+  },
+  {
+    "id": "c6",
+    "kind": "category",
+    "targets": 1,
+    "text": "Byer eller land som starter med {letter}. {name} starter."
+  },
+  {
+    "id": "c7",
+    "kind": "category",
+    "targets": 1,
+    "text": "Filmtitler som starter med {letter}. {name} starter."
+  },
+  {
+    "id": "c8",
+    "kind": "category",
+    "targets": 1,
+    "text": "{name} kan velge kategorien. {name} starter."
+  },
+  {
+    "id": "c9",
+    "kind": "category",
+    "targets": 1,
+    "text": "Alkoholmerker. {name} starter."
+  },
+  {
+    "id": "c10",
+    "kind": "category",
+    "targets": 1,
+    "text": "Sangtitler. {name} starter."
+  },
+  {
+    "id": "r1",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} må sitte i fanget til {name2} til videre beskjed."
+  },
+  {
+    "id": "r2",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} kan ikke snakke til videre beskjed."
+  },
+  {
+    "id": "r3",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} trenger en pause fra å stirre på pupper. (Blir ikke lenge, ikke stress)"
+  },
+  {
+    "id": "r4",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må bare snakke i spørsmål til videre beskjed."
+  },
+  {
+    "id": "r5",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} må drikke når {name2} drikker til videre beskjed."
+  },
+  {
+    "id": "r6",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må velge en drikke-buddy — de drikker sammen til videre beskjed."
+  },
+  {
+    "id": "r7",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} må flørte med {name2} hver gang de snakker til videre beskjed."
+  },
+  {
+    "id": "r8",
+    "kind": "rule",
+    "targets": 3,
+    "text": "{name} må kalle {name1} et navn som {name2} velger til videre beskjed."
+  },
+  {
+    "id": "r9",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} må kalle {name2} «baby» til videre beskjed."
+  },
+  {
+    "id": "r10",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} kan ikke si «nei» til videre beskjed."
+  },
+  {
+    "id": "r11",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må smile hele tiden til videre beskjed."
+  },
+  {
+    "id": "r12",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må være enig i alt til videre beskjed."
+  },
+  {
+    "id": "r13",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må starte hver setning med «ærlig talt» til videre beskjed."
+  },
+  {
+    "id": "r14",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må avslutte hver setning med «uwu» til videre beskjed."
+  },
+  {
+    "id": "r15",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må reise seg når de snakker til videre beskjed."
+  },
+  {
+    "id": "r16",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må alltid ha en drink i hånda til videre beskjed."
+  },
+  {
+    "id": "r17",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må bare snakke i sangtekster til videre beskjed."
+  },
+  {
+    "id": "r18",
+    "kind": "rule",
+    "targets": 2,
+    "text": "{name1} må spørre {name2} om lov før de drikker til videre beskjed."
+  },
+  {
+    "id": "r19",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må avslutte hver setning med «no cap» til videre beskjed."
+  },
+  {
+    "id": "r20",
+    "kind": "rule",
+    "targets": 1,
+    "text": "{name} må avslutte hver setning med «inshallah» til videre beskjed."
+  }
+]

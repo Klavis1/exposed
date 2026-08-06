@@ -1,6 +1,8 @@
-import type { PlayMode, RoomPublicState } from "@shared/types";
+import type { Locale, PlayMode, RoomPublicState } from "@shared/types";
 import { Avatar } from "../components/Avatar";
+import { LanguageToggle } from "../components/LanguageToggle";
 import { BrandMark, Button, Card, ErrorBanner, Shell } from "../components/ui";
+import { useT } from "../i18n/LocaleContext";
 
 interface Props {
   room: RoomPublicState;
@@ -8,6 +10,7 @@ interface Props {
   error: string | null;
   onStart: () => void;
   onSetPlayMode: (playMode: PlayMode) => void;
+  onSetLocale: (locale: Locale) => void;
   onLeave: () => void;
 }
 
@@ -17,8 +20,10 @@ export function Lobby({
   error,
   onStart,
   onSetPlayMode,
+  onSetLocale,
   onLeave,
 }: Props) {
+  const t = useT();
   const ready = room.players.length >= room.minPlayers;
   const isSpicy = room.playMode === "spicy";
   const isVoteoff = room.playMode === "voteoff";
@@ -28,16 +33,26 @@ export function Lobby({
       ? "/voteoff.png?v=1"
       : "/tea-time.png?v=2";
   const modeLabel = isSpicy
-    ? "Spicy Stakes"
+    ? t("modeSpicy")
     : isVoteoff
-      ? "Voteoff"
-      : "Tea Time";
+      ? t("modeVoteoff")
+      : t("modeTea");
 
   return (
     <Shell>
       <div className="flex min-h-0 flex-1 flex-col gap-3">
-        <div className="flex shrink-0 justify-center">
+        <div className="flex shrink-0 items-start justify-between gap-2">
+          <div className="flex-1" />
           <BrandMark small />
+          <div className="flex flex-1 justify-end">
+            {isHost ? (
+              <LanguageToggle locale={room.locale} onChange={onSetLocale} />
+            ) : (
+              <span className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-2)]/80 px-2.5 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+                {room.locale}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="shrink-0 px-1 text-center">
@@ -45,21 +60,21 @@ export function Lobby({
             <div className="grid grid-cols-3 gap-1.5">
               <ModeOption
                 src="/tea-time.png?v=2"
-                label="Tea Time"
+                label={t("modeTea")}
                 selected={room.playMode === "bakRyggen"}
                 accent="var(--color-tea)"
                 onClick={() => onSetPlayMode("bakRyggen")}
               />
               <ModeOption
                 src="/spicy-stakes.png?v=3"
-                label="Spicy Stakes"
+                label={t("modeSpicy")}
                 selected={isSpicy}
                 accent="var(--color-accent)"
                 onClick={() => onSetPlayMode("spicy")}
               />
               <ModeOption
                 src="/voteoff.png?v=1"
-                label="Voteoff"
+                label={t("modeVoteoff")}
                 selected={isVoteoff}
                 accent="var(--color-category)"
                 onClick={() => onSetPlayMode("voteoff")}
@@ -97,7 +112,7 @@ export function Lobby({
         <Card className="flex min-h-0 flex-1 flex-col overflow-hidden !p-3">
           <div className="mb-2 flex shrink-0 items-center justify-between">
             <p className="text-sm font-medium text-[var(--color-muted)]">
-              In the lobby
+              {t("inLobby")}
             </p>
             <p className="text-sm text-[var(--color-ink)]">
               {room.players.length} / {room.maxPlayers}
@@ -114,8 +129,8 @@ export function Lobby({
                   {p.isHost ? (
                     <img
                       src="/host-crown.png?v=2"
-                      alt="Host"
-                      title="Host"
+                      alt={t("host")}
+                      title={t("host")}
                       className="absolute -right-2 -top-2 h-9 w-9 object-contain drop-shadow-md"
                     />
                   ) : null}
@@ -128,7 +143,7 @@ export function Lobby({
           </ul>
           {!ready ? (
             <p className="mt-2 shrink-0 text-xs text-[var(--color-muted)]">
-              Need at least {room.minPlayers} players to start.
+              {t("needPlayers", room.minPlayers)}
             </p>
           ) : null}
         </Card>
@@ -143,11 +158,11 @@ export function Lobby({
                 isSpicy || isVoteoff ? "" : "border-[var(--color-tea)]/50"
               }
             >
-              Start game
+              {t("startGame")}
             </Button>
           ) : (
             <p className="py-1 text-center text-sm text-[var(--color-muted)]">
-              Waiting for the host to start…
+              {t("waitingHostStart")}
             </p>
           )}
           <Button
@@ -155,7 +170,7 @@ export function Lobby({
             className="!min-h-10 py-2 text-sm"
             onClick={onLeave}
           >
-            Leave room
+            {t("leaveRoom")}
           </Button>
         </div>
       </div>

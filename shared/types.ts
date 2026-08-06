@@ -1,5 +1,10 @@
 export type PlayMode = "bakRyggen" | "spicy" | "voteoff";
 export type GameMode = "lobby" | PlayMode;
+export type Locale = "en" | "no";
+
+export function isLocale(value: unknown): value is Locale {
+  return value === "en" || value === "no";
+}
 
 export type VoteOffKind = "versus" | "yesNo";
 export type VoteOffPhase = "voting" | "reveal" | "finished";
@@ -97,6 +102,8 @@ export interface SpicyState {
   targetIds: string[];
   targetNames: string[];
   targetAvatars: (string | undefined)[];
+  /** Filled starting letter for category prompts that use {letter} */
+  letter?: string;
   remaining: number;
   activeRules: SpicyActiveRule[];
   phase: "playing" | "finished";
@@ -109,6 +116,8 @@ export interface RoomPublicState {
   mode: GameMode;
   /** Mode chosen when the room was created */
   playMode: PlayMode;
+  /** Shared room language — all clients follow this */
+  locale: Locale;
   minPlayers: number;
   maxPlayers: number;
   bakRyggen?: BakRyggenState;
@@ -126,7 +135,12 @@ export interface ServerToClientEvents {
 /** Client-emitted events */
 export interface ClientToServerEvents {
   "room:create": (
-    payload: { name: string; avatar?: string; playMode: PlayMode },
+    payload: {
+      name: string;
+      avatar?: string;
+      playMode: PlayMode;
+      locale?: Locale;
+    },
     cb?: (res: CreateJoinResult) => void
   ) => void;
   "room:join": (
@@ -141,6 +155,7 @@ export interface ClientToServerEvents {
   "room:start": () => void;
   "room:endGame": () => void;
   "room:setPlayMode": (payload: { playMode: PlayMode }) => void;
+  "room:setLocale": (payload: { locale: Locale }) => void;
   "bakRyggen:submit": (payload: {
     question: string;
     gossip: string;
