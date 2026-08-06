@@ -28,13 +28,17 @@ export function Shell({
 
 export function BrandMark({ small = false }: { small?: boolean }) {
   return (
-    <p
-      className={`font-display font-extrabold tracking-tight text-[var(--color-ink)] ${
-        small ? "text-2xl" : "text-5xl leading-none sm:text-6xl"
-      }`}
-    >
-      Exposed
-    </p>
+    <div className={small ? "w-full max-w-[11rem]" : "w-full"}>
+      <img
+        src="/cabin-chaos-logo.png"
+        alt="Cabin Chaos"
+        className={
+          small
+            ? "mx-auto h-auto w-full object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.45)]"
+            : "mx-auto h-auto w-full max-w-[22rem] object-contain drop-shadow-[0_16px_36px_rgba(0,0,0,0.5)]"
+        }
+      />
+    </div>
   );
 }
 

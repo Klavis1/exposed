@@ -71,8 +71,8 @@ export function Home({
       <div className="flex min-h-0 flex-1 flex-col justify-center gap-5 overflow-y-auto overscroll-contain py-1">
         <div className="shrink-0 space-y-3 animate-fade-up">
           <BrandMark />
-          <p className="max-w-[17rem] text-base leading-snug text-[var(--color-muted)]">
-            Create a room. Share the PIN. Let your friends expose each other.
+          <p className="max-w-[20rem] text-base leading-snug text-[var(--color-muted)]">
+            What happens at the cabin, stays at the cabin.
           </p>
           {!connected ? (
             <p className="text-xs text-[var(--color-accent-2)]">Connecting…</p>
@@ -83,9 +83,18 @@ export function Home({
 
         {step === "choose" ? (
           <div className="flex flex-col gap-3 animate-fade-up">
-            <Button onClick={() => setStep("pickMode")}>Create game</Button>
-            <Button variant="secondary" onClick={() => setStep("join")}>
+            <Button
+              onClick={() => setStep("join")}
+              className="min-h-16 text-lg shadow-[0_14px_36px_rgba(255,92,106,0.38)]"
+            >
               Join
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setStep("pickMode")}
+              className="min-h-11 text-sm opacity-90"
+            >
+              Create game
             </Button>
           </div>
         ) : null}

@@ -1,6 +1,6 @@
-# Exposed
+# Cabin Chaos
 
-18+ party web app. Friends join via PIN on their own phones.
+18+ party web app. What happens at the cabin, stays at the cabin. Friends join via PIN on their own phones.
 
 ## Modes
 

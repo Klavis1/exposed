@@ -277,5 +277,5 @@ app.get("*", (_req, res) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`Exposed server at http://localhost:${PORT}`);
+  console.log(`Cabin Chaos server at http://localhost:${PORT}`);
 });
