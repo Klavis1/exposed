@@ -6,11 +6,12 @@ import type {
   PlayMode,
   Player,
   RoomPublicState,
+  RyktetGarState,
   SpicyState,
   VoteOffPlayerRef,
   VoteOffState,
 } from "../../shared/types.js";
-import { isLocale } from "../../shared/types.js";
+import { isLocale, isPlayMode } from "../../shared/types.js";
 import {
   advanceRevealIndex,
   buildRevealQueue,
@@ -36,6 +37,17 @@ import {
   tallyVotes,
   type VoteOffInternal,
 } from "./games/voteoff.js";
+import {
+  currentRevealPad,
+  maybeAdvanceRyktet,
+  nextRyktetReveal,
+  previousEntry,
+  startRyktetGar,
+  submitRyktetTurn,
+  turnKind,
+  type RyktetGarInternal,
+} from "./games/ryktetGar.js";
+import { normalizeDrawing } from "./avatar.js";
 import { t } from "./i18n.js";
 
 const MIN_PLAYERS = 3;
@@ -52,6 +64,7 @@ export interface Room {
   bakRyggen?: BakRyggenInternal;
   spicy?: SpicyInternal;
   voteoff?: VoteOffInternal;
+  ryktetGar?: RyktetGarInternal;
   /** socketId -> playerId */
   sockets: Map<string, string>;
 }
@@ -118,6 +131,7 @@ function resetRoomToLobby(room: Room) {
   room.bakRyggen = undefined;
   room.spicy = undefined;
   room.voteoff = undefined;
+  room.ryktetGar = undefined;
 }
 
 function enterCountdown(room: Room) {
@@ -269,6 +283,7 @@ export function joinRoom(
   ) {
     room.voteoff.expectedVoterIds.push(playerId);
   }
+  // Late joiners spectate Ryktet går — pads are frozen at start.
 
   return { room, playerId };
 }
@@ -317,6 +332,9 @@ function afterPlayerRemoved(room: Room): Room | null {
     ) {
       room.voteoff.phase = "reveal";
     }
+  }
+  if (room.mode === "ryktetGar" && room.ryktetGar?.phase === "playing") {
+    maybeAdvanceRyktet(room.ryktetGar, [...room.players.keys()]);
   }
 
   return room;
@@ -421,6 +439,7 @@ export function startMode(room: Room, playerId: string): string | null {
   room.bakRyggen = undefined;
   room.spicy = undefined;
   room.voteoff = undefined;
+  room.ryktetGar = undefined;
 
   if (mode === "bakRyggen") {
     room.bakRyggen = startBakRyggen([...room.players.keys()]);
@@ -430,6 +449,11 @@ export function startMode(room: Room, playerId: string): string | null {
     dealNext(room.spicy, [...room.players.keys()]);
   } else if (mode === "voteoff") {
     room.voteoff = startVoteOff([...room.players.keys()], room.locale);
+  } else if (mode === "ryktetGar") {
+    room.ryktetGar = startRyktetGar(
+      [...room.players.values()].map((p) => ({ id: p.id, name: p.name })),
+      room.locale
+    );
   } else {
     return t(room.locale, "chooseMode");
   }
@@ -449,11 +473,7 @@ export function setPlayMode(
 ): string | null {
   if (room.hostId !== playerId) return t(room.locale, "onlyHostMode");
   if (room.mode !== "lobby") return t(room.locale, "changeModeLobby");
-  if (
-    playMode !== "bakRyggen" &&
-    playMode !== "spicy" &&
-    playMode !== "voteoff"
-  ) {
+  if (!isPlayMode(playMode)) {
     return t(room.locale, "chooseMode");
   }
   room.playMode = playMode;
@@ -558,6 +578,46 @@ export function forceRevealVoteOff(
   return forceReveal(game);
 }
 
+export function submitRyktetGar(
+  room: Room,
+  playerId: string,
+  payload: { text?: string; image?: string }
+): string | null {
+  const game = room.ryktetGar;
+  if (!game || room.mode !== "ryktetGar") return t(room.locale, "gameNotActive");
+
+  const player = room.players.get(playerId);
+  if (player) game.playerNames.set(playerId, player.name);
+
+  let image: string | undefined;
+  if (turnKind(game.currentTurn) === "drawing" && game.phase === "playing") {
+    try {
+      image = normalizeDrawing(payload.image);
+    } catch (err) {
+      return err instanceof Error ? err.message : t(room.locale, "invalidImage");
+    }
+  }
+
+  const err = submitRyktetTurn(game, playerId, {
+    text: payload.text,
+    image,
+  });
+  if (err) return err;
+  maybeAdvanceRyktet(game, [...room.players.keys()]);
+  return null;
+}
+
+export function nextRyktetGar(room: Room, playerId: string): string | null {
+  if (room.hostId !== playerId) return t(room.locale, "onlyHostContinue");
+  const game = room.ryktetGar;
+  if (!game || room.mode !== "ryktetGar") return t(room.locale, "gameNotActive");
+  if (game.phase === "finished") {
+    resetRoomToLobby(room);
+    return null;
+  }
+  return nextRyktetReveal(game);
+}
+
 function playerRef(
   room: Room,
   id: string | undefined
@@ -633,6 +693,69 @@ function voteoffPublic(
         base.votersForNo = refsFor(room, t.votersNo);
       }
     }
+  }
+
+  return base;
+}
+
+function ryktetGarPublic(
+  room: Room,
+  viewerId: string
+): RyktetGarState | undefined {
+  const game = room.ryktetGar;
+  if (!game) return undefined;
+
+  const present = game.playerOrder.filter((id) => room.players.has(id));
+  const n = game.playerOrder.length;
+  const totalTurns = Math.max(1, n - 1);
+  const turnIndex = Math.min(game.currentTurn, totalTurns);
+  const inRound = game.playerOrder.includes(viewerId);
+
+  const base: RyktetGarState = {
+    phase: game.phase,
+    turnIndex,
+    totalTurns,
+    turnKind: turnKind(Math.min(game.currentTurn, totalTurns)),
+    submittedCount: present.filter((id) =>
+      game.submittedThisTurn.has(id)
+    ).length,
+    totalPlayers: present.length,
+    hasSubmitted: game.submittedThisTurn.has(viewerId),
+    inRound,
+    revealPadIndex: game.revealPadIndex,
+    revealPadCount: n,
+  };
+
+  if (game.phase === "playing" && inRound && !base.hasSubmitted) {
+    const prev = previousEntry(game, viewerId);
+    if (base.turnKind === "drawing") {
+      base.promptText = prev?.text;
+    } else {
+      base.promptImage = prev?.image;
+    }
+  }
+
+  if (game.phase === "reveal") {
+    const ownerId = game.playerOrder[game.revealPadIndex];
+    if (ownerId) {
+      base.revealOwner =
+        playerRef(room, ownerId) ?? {
+          id: ownerId,
+          name: game.playerNames.get(ownerId) ?? "?",
+        };
+    }
+    const pad = currentRevealPad(game);
+    const shown = pad?.entries.slice(0, game.revealEntryIndex + 1) ?? [];
+    base.revealEntries = shown.map((entry) => ({
+      kind: entry.kind,
+      authorId: entry.authorId,
+      authorName:
+        room.players.get(entry.authorId)?.name ??
+        game.playerNames.get(entry.authorId) ??
+        "?",
+      text: entry.text,
+      image: entry.image,
+    }));
   }
 
   return base;
@@ -730,6 +853,7 @@ export function toPublicState(room: Room, viewerId: string): RoomPublicState {
     bakRyggen: bakRyggenPublic(room, viewerId),
     spicy: spicyPublic(room),
     voteoff: voteoffPublic(room, viewerId),
+    ryktetGar: ryktetGarPublic(room, viewerId),
   };
 }
 

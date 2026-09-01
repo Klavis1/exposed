@@ -1,9 +1,19 @@
-export type PlayMode = "bakRyggen" | "spicy" | "voteoff";
+export const PLAY_MODES = [
+  "bakRyggen",
+  "spicy",
+  "voteoff",
+  "ryktetGar",
+] as const;
+export type PlayMode = (typeof PLAY_MODES)[number];
 export type GameMode = "lobby" | PlayMode;
 export type Locale = "en" | "no";
 
 export function isLocale(value: unknown): value is Locale {
   return value === "en" || value === "no";
+}
+
+export function isPlayMode(value: unknown): value is PlayMode {
+  return PLAY_MODES.includes(value as PlayMode);
 }
 
 export type VoteOffKind = "versus" | "yesNo";
@@ -40,6 +50,39 @@ export interface VoteOffState {
   votersForB?: VoteOffPlayerRef[];
   votersForYes?: VoteOffPlayerRef[];
   votersForNo?: VoteOffPlayerRef[];
+}
+
+export type RyktetGarPhase = "playing" | "reveal" | "finished";
+export type RyktetGarTurnKind = "drawing" | "guessing";
+export type RyktetGarEntryKind = "prompt" | "drawing" | "guess";
+
+export interface RyktetGarEntry {
+  kind: RyktetGarEntryKind;
+  authorId: string;
+  authorName: string;
+  text?: string;
+  image?: string;
+}
+
+export interface RyktetGarState {
+  phase: RyktetGarPhase;
+  turnIndex: number;
+  totalTurns: number;
+  turnKind: RyktetGarTurnKind;
+  submittedCount: number;
+  totalPlayers: number;
+  hasSubmitted: boolean;
+  /** False if you joined after this round started */
+  inRound: boolean;
+  /** Text to draw this turn */
+  promptText?: string;
+  /** Drawing to guess this turn */
+  promptImage?: string;
+  /** Reveal: whose book, and entries shown so far */
+  revealOwner?: VoteOffPlayerRef;
+  revealEntries?: RyktetGarEntry[];
+  revealPadIndex: number;
+  revealPadCount: number;
 }
 
 export type BakRyggenPhase = "writing" | "countdown" | "reveal";
@@ -123,6 +166,7 @@ export interface RoomPublicState {
   bakRyggen?: BakRyggenState;
   spicy?: SpicyState;
   voteoff?: VoteOffState;
+  ryktetGar?: RyktetGarState;
   error?: string;
 }
 
@@ -167,6 +211,8 @@ export interface ClientToServerEvents {
   "voteoff:vote": (payload: { choiceId: string }) => void;
   "voteoff:next": () => void;
   "voteoff:forceReveal": () => void;
+  "ryktetGar:submit": (payload: { text?: string; image?: string }) => void;
+  "ryktetGar:next": () => void;
 }
 
 export interface CreateJoinResult {

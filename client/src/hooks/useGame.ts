@@ -250,6 +250,17 @@ export function useGame() {
     socket?.emit("voteoff:forceReveal");
   }, [socket]);
 
+  const submitRyktetGar = useCallback(
+    (payload: { text?: string; image?: string }) => {
+      socket?.emit("ryktetGar:submit", payload);
+    },
+    [socket]
+  );
+
+  const nextRyktetGar = useCallback(() => {
+    socket?.emit("ryktetGar:next");
+  }, [socket]);
+
   const me = useMemo(
     () => room?.players.find((p) => p.id === playerId) ?? null,
     [room, playerId]
@@ -281,5 +292,7 @@ export function useGame() {
     voteVoteOff,
     nextVoteOff,
     forceRevealVoteOff,
+    submitRyktetGar,
+    nextRyktetGar,
   };
 }

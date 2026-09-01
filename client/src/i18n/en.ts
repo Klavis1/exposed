@@ -1,6 +1,6 @@
 export const en = {
   tagline: "What happens at the cabin, stays at the cabin.",
-  ageSubtitle: "Adult party games — Tea Time, Spicy Stakes, and Voteoff.",
+  ageSubtitle: "Adult party games — Tea Time, Spicy Stakes, Voteoff, and Ryktet går.",
   ageBlurb:
     "Cabin Chaos includes sexual themes, gossip, and challenges meant for adults. Everyone plays voluntarily — skip anything that feels wrong.",
   ageConfirm: "I am 18 or older",
@@ -13,6 +13,7 @@ export const en = {
   modeTea: "Tea Time",
   modeSpicy: "Spicy Stakes",
   modeVoteoff: "Voteoff",
+  modeRyktet: "Ryktet går",
   yourNickname: "Your nickname",
   nicknameExample: "e.g. Melany",
   createRoom: "Create room",
@@ -69,6 +70,22 @@ export const en = {
   revealNow: "Reveal now",
   hostRunningVoteoff: "Host is running Voteoff…",
   voteLocked: "Vote locked in.",
+  // Ryktet går
+  ryktetEnd: "That's the last book for this round.",
+  hostRunningRyktet: "Host is flipping through the books…",
+  ryktetDrawThis: "Draw this",
+  ryktetGuessThis: "What is this?",
+  ryktetGuessPh: "Your guess…",
+  ryktetUndo: "Undo",
+  ryktetClear: "Clear",
+  ryktetSpectate: "This round already started. You'll play next time.",
+  ryktetOriginal: "Started as",
+  ryktetDrew: "drew this",
+  ryktetGuessed: "guessed",
+  ryktetBook: "Book",
+  ryktetTurn: (a: number, b: number) => `Turn ${a} / ${b}`,
+  ryktetPad: (a: number, b: number) => `Book ${a} / ${b}`,
+  ryktetWaiting: (a: number, b: number) => `Waiting… ${a} / ${b}`,
   // Tea Time
   teaQuestion: "Question",
   teaGossip: "Gossip",

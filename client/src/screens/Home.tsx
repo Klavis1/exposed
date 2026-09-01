@@ -122,7 +122,9 @@ export function Home({
       ? t("modeSpicy")
       : playMode === "voteoff"
         ? t("modeVoteoff")
-        : t("modeTea");
+        : playMode === "ryktetGar"
+          ? t("modeRyktet")
+          : t("modeTea");
 
   const hideBrand = step === "joinPin" || step === "joinProfile";
 
@@ -204,6 +206,16 @@ export function Home({
               accent="var(--color-category)"
               onPick={() => {
                 setPlayMode("voteoff");
+                setStep("create");
+                onError(null);
+              }}
+            />
+            <ModePickButton
+              src="/ryktet-gar.png?v=1"
+              label={t("modeRyktet")}
+              accent="var(--color-rumor)"
+              onPick={() => {
+                setPlayMode("ryktetGar");
                 setStep("create");
                 onError(null);
               }}

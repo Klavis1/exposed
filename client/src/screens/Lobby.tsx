@@ -30,16 +30,21 @@ export function Lobby({
   const ready = room.players.length >= room.minPlayers;
   const isSpicy = room.playMode === "spicy";
   const isVoteoff = room.playMode === "voteoff";
+  const isRyktet = room.playMode === "ryktetGar";
   const modeLogo = isSpicy
     ? "/spicy-stakes.png?v=3"
     : isVoteoff
       ? "/voteoff.png?v=1"
-      : "/tea-time.png?v=2";
+      : isRyktet
+        ? "/ryktet-gar.png?v=1"
+        : "/tea-time.png?v=2";
   const modeLabel = isSpicy
     ? t("modeSpicy")
     : isVoteoff
       ? t("modeVoteoff")
-      : t("modeTea");
+      : isRyktet
+        ? t("modeRyktet")
+        : t("modeTea");
 
   const [qrOpen, setQrOpen] = useState(false);
   const joinUrl = useMemo(
@@ -67,7 +72,7 @@ export function Lobby({
 
           <div className="px-1 text-center">
             {isHost ? (
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 gap-1.5">
                 <ModeOption
                   src="/tea-time.png?v=2"
                   label={t("modeTea")}
@@ -88,6 +93,13 @@ export function Lobby({
                   selected={isVoteoff}
                   accent="var(--color-category)"
                   onClick={() => onSetPlayMode("voteoff")}
+                />
+                <ModeOption
+                  src="/ryktet-gar.png?v=1"
+                  label={t("modeRyktet")}
+                  selected={isRyktet}
+                  accent="var(--color-rumor)"
+                  onClick={() => onSetPlayMode("ryktetGar")}
                 />
               </div>
             ) : (
@@ -170,11 +182,13 @@ export function Lobby({
         <div className="flex shrink-0 flex-col gap-2 border-t border-[var(--color-line)]/60 pt-2">
           {isHost ? (
             <Button
-              variant={isSpicy || isVoteoff ? "spicy" : "secondary"}
+              variant={isSpicy || isVoteoff || isRyktet ? "spicy" : "secondary"}
               disabled={!ready}
               onClick={onStart}
               className={
-                isSpicy || isVoteoff ? "" : "border-[var(--color-tea)]/50"
+                isSpicy || isVoteoff || isRyktet
+                  ? ""
+                  : "border-[var(--color-tea)]/50"
               }
             >
               {t("startGame")}

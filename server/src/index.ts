@@ -8,7 +8,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "../../shared/types.js";
-import { isLocale } from "../../shared/types.js";
+import { isLocale, isPlayMode } from "../../shared/types.js";
 import { normalizeAvatar } from "./avatar.js";
 import { t } from "./i18n.js";
 import {
@@ -23,11 +23,13 @@ import {
   nextBakRyggenStep,
   nextSpicy,
   nextVoteOff,
+  nextRyktetGar,
   setLocale,
   setPlayMode,
   setRoomNotifier,
   startMode,
   submitBakRyggen,
+  submitRyktetGar,
   toPublicState,
   voteVoteOff,
 } from "./rooms.js";
@@ -41,7 +43,7 @@ app.use(cors());
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: { origin: "*" },
-  maxHttpBufferSize: 2e6,
+  maxHttpBufferSize: 4e6,
   // More tolerant of mobile browsers suspending the tab briefly
   pingInterval: 25_000,
   pingTimeout: 60_000,
@@ -78,11 +80,7 @@ io.on("connection", (socket) => {
       cb?.({ ok: false, error: t(createLocale, "nameLetters") });
       return;
     }
-    if (
-      playMode !== "bakRyggen" &&
-      playMode !== "spicy" &&
-      playMode !== "voteoff"
-    ) {
+    if (!isPlayMode(playMode)) {
       cb?.({ ok: false, error: t(createLocale, "chooseMode") });
       return;
     }
@@ -281,6 +279,28 @@ io.on("connection", (socket) => {
     const found = getRoomBySocket(socket.id);
     if (!found) return;
     const err = forceRevealVoteOff(found.room, found.playerId);
+    if (err) {
+      emitError(socket.id, err);
+      return;
+    }
+    broadcastRoom(found.room.pin);
+  });
+
+  socket.on("ryktetGar:submit", (payload) => {
+    const found = getRoomBySocket(socket.id);
+    if (!found) return;
+    const err = submitRyktetGar(found.room, found.playerId, payload ?? {});
+    if (err) {
+      emitError(socket.id, err);
+      return;
+    }
+    broadcastRoom(found.room.pin);
+  });
+
+  socket.on("ryktetGar:next", () => {
+    const found = getRoomBySocket(socket.id);
+    if (!found) return;
+    const err = nextRyktetGar(found.room, found.playerId);
     if (err) {
       emitError(socket.id, err);
       return;

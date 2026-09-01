@@ -4,6 +4,7 @@ import { AgeGate } from "./screens/AgeGate";
 import { BakRyggen } from "./screens/BakRyggen";
 import { Home } from "./screens/Home";
 import { Lobby } from "./screens/Lobby";
+import { RyktetGar } from "./screens/RyktetGar";
 import { Spicy } from "./screens/Spicy";
 import { VoteOff } from "./screens/VoteOff";
 
@@ -71,6 +72,19 @@ function AppBody({ game }: { game: ReturnType<typeof useGame> }) {
         onVote={game.voteVoteOff}
         onNext={game.nextVoteOff}
         onForceReveal={game.forceRevealVoteOff}
+        onEnd={game.endGame}
+      />
+    );
+  }
+
+  if (game.room.mode === "ryktetGar" && game.room.ryktetGar) {
+    return (
+      <RyktetGar
+        ryktetGar={game.room.ryktetGar}
+        isHost={game.isHost}
+        error={game.error}
+        onSubmit={game.submitRyktetGar}
+        onNext={game.nextRyktetGar}
         onEnd={game.endGame}
       />
     );
